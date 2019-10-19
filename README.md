@@ -12,11 +12,13 @@ proper contorls studied in the class.
 
 Communication mechanism ensures secure communication via insecure public network among headquarter
 and branches, and thus it provides authenticated, confidential, accurate and consistent communication.
+
 `TODO`
 
 #### Protection Mechanism
 
 Through protection mechanism, different users are allowed to handle different assets in some proper way based on policy.
+
 `TODO`
 
 
