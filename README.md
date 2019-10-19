@@ -13,9 +13,9 @@ proper contorls studied in the class.
 Communication mechanism ensures secure communication via insecure public network among headquarter
 and branches, and thus it provides authenticated, confidential, accurate and consistent communication.
 
-* Code : `TODO`
 * Flowchart :
-![Communication Mechanism Flowchart](/CommMechFlowchart.png)
+![Communication Mechanism Flowchart](/flowcharts/CommMechFlowchart.png)
+* Code : `TODO`
 
 
 
@@ -24,7 +24,11 @@ and branches, and thus it provides authenticated, confidential, accurate and con
 
 Through protection mechanism, different users are allowed to handle different assets in some proper way based on policy.
 
-`TODO`
+* Flowchart : `TODO`
+* Code : `TODO`
+
+#### 
+
 
 
 
