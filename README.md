@@ -18,9 +18,7 @@ and branches, and thus it provides authenticated, confidential, accurate and con
 * Code : `TODO`
 
 
-
-
-#### Protection Mechanism
+### Protection Mechanism
 
 Through protection mechanism, different users are allowed to handle different assets in some proper way based on policy.
 
@@ -28,7 +26,9 @@ Through protection mechanism, different users are allowed to handle different as
 ![Asset Protection Flowchart](/flowcharts/Asset&#32;protection.png)
 * Code : `TODO`
 
-
+* Flowchart :
+![Initial login Flowchart](/flowcharts/Initial&#32;login.png)
+* Code : `TODO`
 
 
 
