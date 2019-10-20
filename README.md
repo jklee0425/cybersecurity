@@ -9,6 +9,7 @@ proper contorls studied in the class.
 ## Security Measures
 
 #### Communication Mechanism
+### Communication Mechanism
 
 Communication mechanism ensures secure communication via insecure public network among headquarter
 and branches, and thus it provides authenticated, confidential, accurate and consistent communication.
