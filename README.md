@@ -25,7 +25,7 @@ and branches, and thus it provides authenticated, confidential, accurate and con
 Through protection mechanism, different users are allowed to handle different assets in some proper way based on policy.
 
 * Flowchart : 
-![Asset Protection Flowchart](/flowcharts/Asset protection.png)
+![Asset Protection Flowchart](/flowcharts/"Asset protection.png")
 * Code : `TODO`
 
 
