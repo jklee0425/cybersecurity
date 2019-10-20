@@ -25,14 +25,14 @@ Through protection mechanism, different users are allowed to handle different as
 
 
 #### - User Access Control 
-    - Flowchart : 
+  - Flowchart : 
 ![Asset Protection Flowchart](/flowcharts/Asset&#32;protection.png)
-    - Code : `TODO`
+  - Code : `TODO`
 
 #### - User Login Session Control 
-    - Flowchart :
+  - Flowchart :
 ![Initial login Flowchart](/flowcharts/Initial&#32;login.png)
-    - Code : `TODO`
+  - Code : `TODO`
 
 
 
