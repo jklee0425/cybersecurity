@@ -1,12 +1,13 @@
 # CPSC2810 Cybersecurity Project
->-Armaan Gill, Erik Dengler, Jake Lee
+>By Armaan Gill, Erik Dengler, Jake Lee
 
 The goal of this project is to design and implement the security measures to support
 the ABC Airline business. The company has headquarter and two branches located in three
 separate cities. The project should address all of the following security requirements with
 proper contorls studied in the class.
 
-![Program Flowchart](/flowcharts/network$#32;security.png)
+* Flowchart:
+![Program Flowchart](/flowcharts/NetworkSecurity.png)
 
 
 ## Security Measures
