@@ -55,7 +55,7 @@ public class Client extends JFrame{
 	}
 	
 	public void diffieHellman(){
-      privKey = (int)(Math.random()*((100-10)+1))+10;
+      		privKey = (int)(Math.random()*((100-10)+1))+10;
 		num1 = (int)(Math.random()*((100-10)+1))+10;
 		num2 = privKey - num1; //primitive root of num1
 		try {
