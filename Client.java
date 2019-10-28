@@ -84,10 +84,11 @@ public class Client extends JFrame{
 		public void actionPerformed(ActionEvent e) {
 			String msg = address.getHostName() + ">" + msgField.getText().trim();
 			try {
-				toServer.writeUTF(msg);
+				toServer.writeUTF(msg + '\n');
 				toServer.flush();
 				msg = fromServer.readUTF();
 				msgArea.append(msg);
+				msgField.setText("");
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
