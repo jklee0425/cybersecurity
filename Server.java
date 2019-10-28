@@ -21,7 +21,7 @@ public class Server extends JFrame{
 	private DataOutputStream toClient;
 	private DataInputStream fromClient;
 	private static ArrayList<Socket> clients;
-	private int privKey, pubKey1, pubKey2, symKey;
+	private int privKey, num1, num2, symKey;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
