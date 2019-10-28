@@ -24,7 +24,7 @@ public class Client extends JFrame{
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int pubKey1, pubKey2, privKey, symKey;
+	private int num1, num2, privKey, symKey;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
@@ -68,7 +68,7 @@ public class Client extends JFrame{
 		}
 	}
 	
-	public String encrypt() {
+	public String encrypt(String msg, int key) {
 		String tmp = "";
 		for(int i = 0; i < msg.length(); i++) {
 			tmp += (char) (msg.charAt(i) + key);
@@ -76,7 +76,7 @@ public class Client extends JFrame{
 		return tmp;
 	}
 	
-	public String decrypt() {
+	public String decrypt(String msg, int key) {
 		String tmp = "";
 		for(int i = 0; i < msg.length(); i++) {
 			tmp += (char) (msg.charAt(i) - key);
