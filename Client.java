@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -17,6 +19,7 @@ public class Client extends JFrame{
 	
 	private JTextArea msgArea;
 	private JTextField msgField;
+	private JMenuBar menuBar;
 	private DataOutputStream toServer;
 	private DataInputStream fromServer;
 	private InetAddress address;
@@ -29,7 +32,7 @@ public class Client extends JFrame{
 		
 		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
-		
+
 		msgField = new JTextField("");
 		msgField.addActionListener(new msgListener());
 		
@@ -39,11 +42,11 @@ public class Client extends JFrame{
 		
 		msgArea = new JTextArea();
 		msgArea.setEditable(false);
-		
 		setLayout(new BorderLayout());
 		add(panel, BorderLayout.SOUTH);
 		add(new JScrollPane(msgArea), BorderLayout.CENTER);
-		
+		createLoginGUI();
+
 		setTitle("Chatroom client");
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -65,7 +68,25 @@ public class Client extends JFrame{
 		//TODO - decrypt data
 		return null;
 	}
-	
+	public void createLoginGUI() {
+		menuBar = new JMenuBar();
+		JMenu newUserButton;
+		JMenu loginButton;
+		JMenu logoutButton;
+
+		newUserButton = new JMenu("Registration");
+		loginButton = new JMenu("Sign In");
+		logoutButton = new JMenu("Sign Out");
+
+		newUserButton.addActionListener(new newUser());
+		loginButton.addActionListener(new signIn());
+		logoutButton.addActionListener(new signOut());
+
+		menuBar.add(newUserButton);
+		menuBar.add(loginButton);
+		menuBar.add(logoutButton);
+		setJMenuBar(menuBar);
+	}
 	public Client(int port) {
 		buildGUI();
 		try {
@@ -80,6 +101,7 @@ public class Client extends JFrame{
 		}
 	}
 	
+
 	private class msgListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			String msg = address.getHostName() + ">" + msgField.getText().trim();
@@ -96,7 +118,16 @@ public class Client extends JFrame{
 		}
 	}
 	
-	
+	private class newUser implements ActionListener{
+
+	}
+	private class signIn implements ActionListener{
+
+	}
+	private class signOut implements ActionListener{
+
+	}
+
 	public static void main(String[] args) {
 		new Client(8081);
 	}
