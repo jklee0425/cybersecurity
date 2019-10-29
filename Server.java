@@ -20,7 +20,7 @@ public class Server extends JFrame{
 	private JTextArea msgArea;
 	private DataOutputStream toClient;
 	private DataInputStream fromClient;
-	private static ArrayList<Socket> clients;
+	private static ArrayList<ClientHandler> clients;
 	private int privKey, num1, num2, symKey;
 	
 	public void buildGUI() {
@@ -75,46 +75,62 @@ public class Server extends JFrame{
 		buildGUI();
 		try (ServerSocket server = new ServerSocket(port)){
 			msgArea.append("Server started \n");
-			clients = new ArrayList<Socket>();
+			clients = new ArrayList<ClientHandler>();
 			msgArea.append("Waiting for clients... \n");
-			Socket client = server.accept();
-			msgArea.append("Client accepted at: " + port + '\n');
+			Socket client;
+			while(true){
+				client = server.accept();
+				msgArea.append("Client accepted at: " + port + '\n');
 			
-			this.fromClient = new DataInputStream(new BufferedInputStream(client.getInputStream()));
-			this.toClient = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
-			
-			doService();
-			
-			msgArea.append("Closing server");
-			client.close();
+				this.fromClient = new DataInputStream(new BufferedInputStream(client.getInputStream()));
+				this.toClient = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
+				
+				ClientHandler handler = new ClientHandler(client, fromClient, toClient);
+				clients.add(handler);
+				Thread t = new Thread(handler);
+				t.start();
+			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-
-
-	private void doService() {
-		String buffer = "";
-		while (!buffer.equals("kill")) {
-			try {
-				buffer = fromClient.readUTF();
-				msgArea.append("Received message: " + buffer + '\n');
-				toClient.writeUTF(buffer);
-				toClient.flush();
-				msgArea.append("Sent message \n");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}
-		
-	}
-	
 	public static void main(String[] args) {
 		new Server(8081);
 	}
+	
+		class ClientHandler implements Runnable{
+		
+		private DataInputStream in;
+		private DataOutputStream out;
+		Socket socket;
+		
+		public ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
+			this.in = in;
+			this.out = out;
+			this.socket = socket;
+		}
+		
+		@Override
+		public void run() {
+			String msg;
+			while(true) {
+				try {
+					msg = in.readUTF();
+					msgArea.append("Got msg: " + msg);
+					for(ClientHandler user : Server.clients) {
+						user.out.writeUTF(msg);
+						user.out.flush();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			
+			}
+		}
+		
+	}
+
 
 }
