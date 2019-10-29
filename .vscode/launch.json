@@ -2,6 +2,18 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Login",
+            "request": "launch",
+            "mainClass": "loginSessionControl.Login"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - logIn",
+            "request": "launch",
+            "mainClass": "loginSessionControl.logIn"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Server",
             "request": "launch",
             "mainClass": "clientServer.Server"

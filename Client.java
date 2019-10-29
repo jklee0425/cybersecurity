@@ -53,7 +53,6 @@ public class Client extends JFrame{
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
-		
 	}
 	
 	public void diffieHellman(){
@@ -87,25 +86,14 @@ public class Client extends JFrame{
 	}
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
-		JMenu newUserButton;
-		JMenu loginButton;
 		JMenu logoutButton;
-
-		newUserButton = new JMenu("Registration");
-		loginButton = new JMenu("Sign In");
 		logoutButton = new JMenu("Sign Out");
-
-		newUserButton.addActionListener(new newUser());
-		loginButton.addActionListener(new signIn());
 		logoutButton.addActionListener(new signOut());
 
-		menuBar.add(newUserButton);
-		menuBar.add(loginButton);
 		menuBar.add(logoutButton);
-
 		setJMenuBar(menuBar);
 	}
-	public Client(int port) {
+	public Client(int port, String host) {
 		buildGUI();
 		
 		System.out.println(this.toString());
@@ -114,7 +102,7 @@ public class Client extends JFrame{
 			this.socket = new Socket(address.getLoopbackAddress(), port);
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-			this.host = address.getHostName();
+			this.host = host;
 		}
 		catch(Exception e) {
 			msgArea.append(e.toString() + '\n');
@@ -139,24 +127,13 @@ public class Client extends JFrame{
 		}
 	}
 	
-	private class newUser implements ActionListener{
-
-	}
-	private class signIn implements ActionListener{
-		public void actionPerformed(ActionEvent e){
-			SingInDialog signIn = new SignInDialog(this);
-			signIn.setVisible(true);
-			if(signIn.isSucceeded()){
-				host = signIn.getUserName();
-			}
-		}
-	}
 	private class signOut implements ActionListener{
-
+		public void actionPerformed(ActionEvent e) {
+			// TODO
+		}
 	}
 
 	public static void main(String[] args) {
-		new Client(8081);
+		new Client(8081, "User");
 	}
-
 }
