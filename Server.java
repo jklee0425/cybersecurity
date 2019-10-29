@@ -86,13 +86,10 @@ public class Server extends JFrame{
 				this.toClient = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
 				
 				ClientHandler handler = new ClientHandler(client, fromClient, toClient);
-				clienys.add(handler)
+				clients.add(handler);
 				Thread t = new Thread(handler);
 				t.start();
 			}
-			
-			msgArea.append("Closing server");
-			client.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
