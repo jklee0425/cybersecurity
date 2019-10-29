@@ -21,7 +21,7 @@ public class Server extends JFrame{
 	private DataOutputStream toClient;
 	private DataInputStream fromClient;
 	private static ArrayList<Socket> clients;
-	private int privKey, pubKey1, pubKey2, symKey;
+	private int privKey, num1, num2, symKey;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
@@ -35,10 +35,40 @@ public class Server extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
+   
+   public int primeGenerator() {
+		int[] primes = {11,13,17,19,23,29,31,37,41,43,47,53,59,61,71,73,79};
+		return primes[(int) (Math.random()*((primes.length)))];
+	}
 	
 	public void diffieHellman(){
-		privKey = (int)(Math.random()*((100-10)+1))+10;
-		//TODO - exchange keys
+		privKey = (int)(Math.random()*((100-80)+1))+80;
+		num1 = primeGenerator();
+		num2 = privKey - num1; //primitive root of num1
+		try {
+			toClient.writeInt((int) (Math.pow(num2, privKey) % num1));
+			toClient.flush();
+			symKey = (int) (Math.pow(fromClient.readInt(), privKey) % num1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+   
+   public static String encrypt(String msg, int key) {
+		String tmp = "";
+		for(int i = 0; i < msg.length(); i++) {
+			tmp += (char) (msg.charAt(i) + key);
+		}
+		return tmp;
+	}
+	
+	public static String decrypt(String msg, int key) {
+		String tmp = "";
+		for(int i = 0; i < msg.length(); i++) {
+			tmp += (char) (msg.charAt(i) - key);
+		}
+		return tmp;
 	}
 	
 	public Server(int port) {

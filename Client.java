@@ -58,18 +58,33 @@ public class Client extends JFrame{
 	}
 	
 	public void diffieHellman(){
-		privKey = (int)(Math.random()*((100-10)+1))+10;
-		//TODO - exchange keys
+      		privKey = (int)(Math.random()*((100-10)+1))+10;
+		num1 = (int)(Math.random()*((100-10)+1))+10;
+		num2 = privKey - num1; //primitive root of num1
+		try {
+			toServer.writeInt((int) (Math.pow(num2, privKey) % num1));
+			toServer.flush();
+			symKey = (int) (Math.pow(fromServer.readInt(), privKey) % num1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public String encrypt() {
-		//TODO - encrypt data
-		return null;
+	public String encrypt(String msg, int key) {
+		String tmp = "";
+		for(int i = 0; i < msg.length(); i++) {
+			tmp += (char) (msg.charAt(i) + key);
+		}
+		return tmp;
 	}
 	
-	public String decrypt() {
-		//TODO - decrypt data
-		return null;
+	public String decrypt(String msg, int key) {
+		String tmp = "";
+		for(int i = 0; i < msg.length(); i++) {
+			tmp += (char) (msg.charAt(i) - key);
+		}
+		return tmp;
 	}
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
