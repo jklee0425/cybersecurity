@@ -25,7 +25,7 @@ public class Client extends JFrame{
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int pubKey1, pubKey2, privKey, symKey;
+	private int num1, num2, privKey, symKey;
 	private String host;
 	
 	public void buildGUI() {
