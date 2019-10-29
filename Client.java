@@ -141,7 +141,14 @@ public class Client extends JFrame{
 	
 	private class signOut implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			// TODO
+			try {
+				toServer.writeUTF(host + " has left the chat room." + '\n');
+				toServer.flush();
+				dispose();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 

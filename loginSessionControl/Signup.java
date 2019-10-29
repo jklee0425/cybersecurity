@@ -4,15 +4,17 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import clientServer.*;
-import loginSessionControl.Helper;
+
 
 public class Login extends JFrame {
     private JTextField tfUsername;
     private JPasswordField pfPassword;
+    private JPasswordField pfConfirm;
     private JLabel lbUsername;
     private JLabel lbPassword;
-    private JButton btnLogin;
+    private JLabel lbConfirm;
     private JButton btnSignup;
+    private JButton btnCancel;
 
     public Login() {
         JPanel userInputPanel = new JPanel();
@@ -22,21 +24,28 @@ public class Login extends JFrame {
         JPanel pwPanel = new JPanel();
         lbPassword = new JLabel(Helper.LABELS[1]);
         pfPassword = new JPasswordField(Helper.INPUT_LENGTH);
+        JPanel cfPanel = new JPanel();
+        lbConfirm = new JLabel(Helper.LABELS[2]);
+        pfConfirm = new JPasswordField(Helper.INPUT_LENGTH);
 
         idPanel.add(lbUsername);
         idPanel.add(tfUsername);
         pwPanel.add(lbPassword);
         pwPanel.add(pfPassword);
+        cfPanel.add(lbConfirm);
+        cfPanel.add(pfConfirm);
 
         userInputPanel.setLayout(new BoxLayout(userInputPanel, BoxLayout.Y_AXIS));
         userInputPanel.add(idPanel);
         userInputPanel.add(pwPanel);
+        userInputPanel.add(pfConfirm);
 
         JPanel btnPanel = new JPanel();
-        btnLogin = new JButton("Log in");
         btnSignup = new JButton("Sign up");
-        btnLogin.addActionListener(new loginListener());
+        btnSignup = new JButton("Cancel");
+
         btnSignup.addActionListener(new signUpListener());
+        btnLogin.addActionListener(new cancelListener());
 
         btnPanel.add(btnLogin);
         btnPanel.add(btnSignup);
@@ -51,18 +60,19 @@ public class Login extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
-    private class loginListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            new Client(8081, Helper.getUsername(this));
-
-        }
-    }
     private class signUpListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            //TODO
+            if(!isTaken(Helper.getUsername(this)) && Helper.pwMatch(this)){
+                // TODO
+            }
         }
     }
-
+    
+    private class cancelListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            dispose();
+        }
+    }
     public static void main(String[] args) {
         new Login();
     }
