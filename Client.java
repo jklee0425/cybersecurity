@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import SignInDialog;
+import sun.tools.jstat.SymbolResolutionClosure;
 
 public class Client extends JFrame{
 	
@@ -25,6 +27,7 @@ public class Client extends JFrame{
 	private InetAddress address;
 	private Socket socket;
 	private int pubKey1, pubKey2, privKey, symKey;
+	private String host;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
@@ -45,7 +48,7 @@ public class Client extends JFrame{
 		setLayout(new BorderLayout());
 		add(panel, BorderLayout.SOUTH);
 		add(new JScrollPane(msgArea), BorderLayout.CENTER);
-		createLoginGUI();
+		createMenuBar();
 
 		setTitle("Chatroom client");
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -68,7 +71,7 @@ public class Client extends JFrame{
 		//TODO - decrypt data
 		return null;
 	}
-	public void createLoginGUI() {
+	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu newUserButton;
 		JMenu loginButton;
@@ -85,6 +88,7 @@ public class Client extends JFrame{
 		menuBar.add(newUserButton);
 		menuBar.add(loginButton);
 		menuBar.add(logoutButton);
+
 		setJMenuBar(menuBar);
 	}
 	public Client(int port) {
@@ -94,6 +98,7 @@ public class Client extends JFrame{
 			this.socket = new Socket(address.getLoopbackAddress(), port);
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+			this.host = address.getHostName();
 		}
 		catch(Exception e) {
 			msgArea.append(e.toString() + '\n');
@@ -104,7 +109,7 @@ public class Client extends JFrame{
 
 	private class msgListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			String msg = address.getHostName() + ">" + msgField.getText().trim();
+			String msg = host + ">" + msgField.getText().trim();
 			try {
 				toServer.writeUTF(msg + '\n');
 				toServer.flush();
@@ -122,7 +127,13 @@ public class Client extends JFrame{
 
 	}
 	private class signIn implements ActionListener{
-
+		public void actionPerformed(ActionEvent e){
+			SingInDialog signIn = new SignInDialog(this);
+			signIn.setVisible(true);
+			if(signIn.isSucceeded()){
+				host = signIn.getUserName();
+			}
+		}
 	}
 	private class signOut implements ActionListener{
 
