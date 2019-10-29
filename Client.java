@@ -120,6 +120,20 @@ public class Client extends JFrame{
 			msgArea.append(e.toString() + '\n');
 			e.printStackTrace(System.err);
 		}
+		Thread read = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					try {
+						msgArea.append(fromServer.readUTF());
+					} catch(IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		});
+		read.start();
 	}
 	
 
@@ -129,8 +143,6 @@ public class Client extends JFrame{
 			try {
 				toServer.writeUTF(msg + '\n');
 				toServer.flush();
-				msg = fromServer.readUTF();
-				msgArea.append(msg);
 				msgField.setText("");
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
