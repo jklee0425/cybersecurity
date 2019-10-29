@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import clientServer.*;
-import loginSessionControl.Helper;
 
 public class Login extends JFrame {
     private JTextField tfUsername;
@@ -53,7 +52,7 @@ public class Login extends JFrame {
     }
     private class loginListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            new Client(8081, Helper.getUsername(this));
+            new Client(8081, Helper.getUsername(tfUsername));
 
         }
     }

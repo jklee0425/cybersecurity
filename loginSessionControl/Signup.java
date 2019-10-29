@@ -1,4 +1,4 @@
-package loginSessionControl;
+
 
 import java.awt.*;
 import java.awt.event.*;
@@ -6,7 +6,8 @@ import javax.swing.*;
 import clientServer.*;
 
 
-public class Login extends JFrame {
+public class Signup extends JFrame {
+
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private JPasswordField pfConfirm;
@@ -16,7 +17,7 @@ public class Login extends JFrame {
     private JButton btnSignup;
     private JButton btnCancel;
 
-    public Login() {
+    public Signup() {
         JPanel userInputPanel = new JPanel();
         JPanel idPanel = new JPanel();
         lbUsername = new JLabel(Helper.LABELS[0]);
@@ -42,13 +43,13 @@ public class Login extends JFrame {
 
         JPanel btnPanel = new JPanel();
         btnSignup = new JButton("Sign up");
-        btnSignup = new JButton("Cancel");
+        btnCancel = new JButton("Cancel");
 
         btnSignup.addActionListener(new signUpListener());
-        btnLogin.addActionListener(new cancelListener());
+        btnCancel.addActionListener(new cancelListener());
 
-        btnPanel.add(btnLogin);
         btnPanel.add(btnSignup);
+        btnPanel.add(btnCancel);
 
         setLayout(new BorderLayout());
         add(userInputPanel, BorderLayout.CENTER);
@@ -62,18 +63,18 @@ public class Login extends JFrame {
     }
     private class signUpListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            if(!isTaken(Helper.getUsername(this)) && Helper.pwMatch(this)){
+            if(!isTaken(Helper.getUsername(tfUsername)) 
+                && Helper.pwMatch(pfPassword, pfConfirm)){
                 // TODO
             }
         }
     }
-    
+    /**
+     * 
+     */
     private class cancelListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             dispose();
         }
-    }
-    public static void main(String[] args) {
-        new Login();
     }
 }
