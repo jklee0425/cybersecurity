@@ -75,7 +75,7 @@ public class Server extends JFrame{
 		buildGUI();
 		try (ServerSocket server = new ServerSocket(port)){
 			msgArea.append("Server started \n");
-			clients = new ArrayList<Socket>();
+			clients = new ArrayList<ClientHandler>();
 			msgArea.append("Waiting for clients... \n");
 			Socket client;
 			while(true){
@@ -84,7 +84,9 @@ public class Server extends JFrame{
 			
 				this.fromClient = new DataInputStream(new BufferedInputStream(client.getInputStream()));
 				this.toClient = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
+				
 				ClientHandler handler = new ClientHandler(client, fromClient, toClient);
+				clienys.add(handler)
 				Thread t = new Thread(handler);
 				t.start();
 			}
