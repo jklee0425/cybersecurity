@@ -1,4 +1,4 @@
-package loginSessionControl;
+package signIn;
 
 public class SignIn{
     public static boolean authenticate(String username, String pw){

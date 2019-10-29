@@ -1,4 +1,4 @@
-package signIn;
+package loginSessionControl;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -14,8 +14,8 @@ public class SignInDialog extends JDialog {
     private JButton btnSignin;
     private JButton btnCancel;
  
-    public SignInDialog(Frame parent) {
-        super(parent, "Login", true);
+    public SignInDialog(JFrame parent) {
+        super(parent, "Sign In", true);
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
  
