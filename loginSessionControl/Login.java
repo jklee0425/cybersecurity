@@ -6,6 +6,10 @@ import javax.swing.*;
 import clientServer.*;
 
 public class Login extends JFrame {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private JLabel lbUsername;
@@ -61,7 +65,16 @@ public class Login extends JFrame {
             //TODO
         }
     }
-
+    /**
+     * Check if the pw matches the username
+     * @param username  id to check from the database
+     * @param pw        password to compare
+     * @return return true if the password matches the username, otherwise false.
+     */
+    public static boolean authenticate(String username, byte[] pw) {
+        // TODO
+        return true;
+    }
     public static void main(String[] args) {
         new Login();
     }

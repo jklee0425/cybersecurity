@@ -24,25 +24,6 @@ public class Helper {
         return new String(pf.getPassword());
     }
     /**
-     * Check if the given username is already in the database
-     * @param username  username to check from the database
-     * @return return true if the name exists in the database, otherwise false.
-     */
-    public static boolean isTaken(String username) {
-        // TODO
-        return true;
-    }
-    /**
-     * Check if the pw matches the username
-     * @param username  id to check from the database
-     * @param pw        password to compare
-     * @return return true if the password matches the username, otherwise false.
-     */
-    public static boolean authenticate(String username, byte[] pw) {
-        // TODO
-        return true;
-    }
-    /**
      * Check if the password and confirm match
      * @param pw1 JPasswordField of the password
      * @param pw2 JPasswordField of the confirm password

@@ -8,6 +8,10 @@ import clientServer.*;
 
 public class Signup extends JFrame {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private JPasswordField pfConfirm;
@@ -68,6 +72,15 @@ public class Signup extends JFrame {
                 // TODO
             }
         }
+    }
+    /**
+     * Check if the given username is already in the database
+     * @param username  username to check from the database
+     * @return return true if the name exists in the database, otherwise false.
+     */
+    public static boolean isTaken(String username) {
+        // TODO
+        return true;
     }
     /**
      * 
