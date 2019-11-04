@@ -86,11 +86,10 @@ public class Client extends JFrame{
 	}
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
-		JMenu logoutButton;
-		logoutButton = new JMenu("Sign Out");
-		logoutButton.addActionListener(new signOut());
+		JMenu menuExit = new JMenu("Exit Chat Room");
+		menuExit.addActionListener(new exitListener());
 
-		menuBar.add(logoutButton);
+		menuBar.add(menuExit);
 		setJMenuBar(menuBar);
 	}
 	public Client(int port, String host) {
@@ -139,10 +138,10 @@ public class Client extends JFrame{
 		}
 	}
 	
-	private class signOut implements ActionListener{
+	private class exitListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			try {
-				toServer.writeUTF(host + " has left the chat room." + '\n');
+				toServer.writeUTF(host + " has left the chat room.\n");
 				toServer.flush();
 				dispose();
 			} catch (IOException e1) {
