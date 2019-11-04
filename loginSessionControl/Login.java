@@ -56,8 +56,9 @@ public class Login extends JFrame {
     }
     private class loginListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            new Client(8081, Helper.getUsername(tfUsername));
-
+            if(isAllowed(Helper.getUsername(tfUsername))){
+                new Client(8081, Helper.getUsername(tfUsername));
+            }
         }
     }
     private class signUpListener implements ActionListener {
@@ -65,13 +66,26 @@ public class Login extends JFrame {
             //TODO
         }
     }
+
+    /**
+     * This method retrieves accessible time of the user from the database
+     * and returns boolean according to the retrieved value and the current time
+     * @param username ID
+     * @return boolean
+     */
+    private boolean isAllowed(String username){
+        // Retrieve allowed time for the user in the system.
+        String[] accessibleTime = {"15:30", "14:40"};
+        LocalTime now = LocalTime.now();
+        return now.isAfter(accessibleTime[0]) && now.isBefore(accessibleTime[1]);
+    }
     /**
      * Check if the pw matches the username
      * @param username  id to check from the database
      * @param pw        password to compare
      * @return return true if the password matches the username, otherwise false.
      */
-    public static boolean authenticate(String username, byte[] pw) {
+    private boolean authenticate(String username, byte[] pw) {
         // TODO
         return true;
     }

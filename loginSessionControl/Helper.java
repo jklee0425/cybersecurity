@@ -39,7 +39,7 @@ public class Helper {
      * @return hashed password as an array of bytes
      * @see https://www.baeldung.com/java-password-hashing
      */
-    public static byte[] passwordHashing(String pw){
+    public static byte[] hashPassword(String pw){
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
