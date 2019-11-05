@@ -12,8 +12,14 @@ public class AES {
 	{
 		for(int i = 0; i < bytes.length; i++) {
 			for(int j = 0; j < bytes[i].length; j++) {
-				bytes[i][j] = (byte) sbox[bytes[i][j]/16][bytes[i][j]%16];
+				bytes[i][j] = (byte) sbox[Math.abs(bytes[i][j]/16)][Math.abs(bytes[i][j]%16)];
 			}
+		}
+	}
+	
+	public static void byteSub(byte[] bytes) {
+		for(int i = 0; i < bytes.length; i++) {
+			bytes[i] = (byte) sbox[Math.abs(bytes[i]/16)][Math.abs(bytes[i]%16)];
 		}
 	}
 	
@@ -80,8 +86,8 @@ public class AES {
 	
 	//copies the matrixes
 	public static void copyMatrix(byte[][] bytes, byte[][] matrix) {
-		for(int i = 0; i < bytes.length; i++) {
-			for(int j = 0; j < bytes[i].length; j++) {
+		for(int i = 0; i < matrix.length; i++) {
+			for(int j = 0; j < matrix[i].length; j++) {
 				bytes[i][j] = matrix[i][j];
 			}
 		}
@@ -103,14 +109,6 @@ public class AES {
 		//TODO - write invert mix columns algorithm
 	}
 	
-	public static void addRoundKey(byte[][] bytes, byte[][] key) {
-		for(int i = 0; i < bytes.length; i++) {
-			for(int j = 0; j < bytes[i].length; j++) {
-				bytes[i][j] ^= key[i][j];
-			}
-		}
-	}
-	
 	//initialize the array with the right size
 	public static byte[][] arrayStart(String msg){
 		int length = msg.length();
@@ -119,10 +117,15 @@ public class AES {
 			length++;
 		}
 		byte[][] arr = new byte[length/4][4];
-		for(int i = 0, k = 0; i < length/4; i++) {
-			for(int j = 0; j < 4; j++) {
-				arr[i][j] = bytes[k];
-				k++;
+		for(int i = 0, k = 0; i < arr.length; i++) {
+			for(int j = 0; j < arr[i].length; j++) {
+				if(k < msg.length()) {
+					arr[i][j] = bytes[k];
+					k++;
+				}
+				else {
+					arr[i][j] = (byte) length;
+				}
 			}
 		}
 		return arr;
@@ -162,26 +165,46 @@ public class AES {
 		return keyMatrix;
 	}
 	
-	public static byte[][] expandKey(byte[][] arr, int cronIndex) {
-		byte[][] key = new byte[arr.length][arr[0].length];
+	public static byte[] getCron(int cronIndex) {
 		ByteBuffer buffer = ByteBuffer.allocate(4);
 		buffer.putInt(cron[cronIndex++]);
-		byte[] bytes = buffer.array();
-		key[0] = arr[3];
-		rightShift(key[0]);
-		for(int i = 0; i < key[0].length; i++) {
-			key[0][i] ^= arr[0][i] ^ bytes[i];
-		}
-		for(int i = 1; i < key.length; i++) {
-			for(int j = 0; j < key[i].length; j++) {
-				key[i][j] = (byte) (arr[i][j] ^ key[i - 1][j]);
+		return buffer.array();
+	}
+	
+	public static byte[][] expandKey(byte[][] arr) {
+		byte[] tmp;
+		byte[][] key = new byte[arr.length*10][arr[0].length];
+		copyMatrix(key, arr);
+		int cronIndex = 0;
+		for(int i = 4; i < key.length; i++) {
+			if(i % 4 == 0) {
+				key[i] = key[i - 4];
+				rightShift(key[i]);
+				byteSub(key[i]);
+				tmp = getCron(cronIndex++);
+				for(int j = 0; j < key[i].length; j++) {
+					key[i][j] ^= key[i][j] ^ tmp[j];
+				}
+			}
+			else {
+				for(int j = 0; j < key[i].length; j++) {
+					key[i][j] = (byte) (key[i - 1][j] ^ key[i - 4][j]);
+				}
 			}
 		}
 		return key;
 	}
 	
-	public static String retString(byte[][] arr, int length) {
-		char[] retVal = new char[length];
+	public static void addRoundKey(byte[][] bytes, byte[][] key, int round) {
+		for(int i = 0; i < bytes.length; i++) {
+			for(int j = 0; j < bytes[i].length; j++) {
+				bytes[i][j] ^= key[i + round * 3][j];
+			}
+		}
+	}
+	
+	public static String retString(byte[][] arr) {
+		char[] retVal = new char[arr.length * arr[0].length];
 		for(int i = 0, l = 0; i < arr.length; i++) {
 			for(int j = 0; j < arr[i].length; j++) {
 				retVal[l] = (char) arr[i][j];
@@ -192,47 +215,47 @@ public class AES {
 	}
 	
 	public static String encrypt(String msg, String key) {
-		int cronIndex = 0;
 		byte[][] keyMatrix = getKey(key);
-		keyMatrix = expandKey(keyMatrix, cronIndex);
 		byte[][] arr = arrayStart(msg);
-		byteToHex(arr);
 		padding(arr, msg.length());
-		byteToHex(arr);
+		keyMatrix = expandKey(keyMatrix);
+		addRoundKey(arr, keyMatrix, 0);
 		
-		//byteSub(arr);
-		//byteToHex(arr);
+		for(int i = 0; i < 9; i++) {
+			byteSub(arr);
+			shiftRows(arr);
+			mixColumns(arr);
+			addRoundKey(arr, keyMatrix, i + 1);
+		}
 		
-		//shiftRows(arr);
-		//byteToHex(arr);
+		byteSub(arr);
+		shiftRows(arr);
+		addRoundKey(arr, keyMatrix, 9);
 		
-		//mixColumns(arr);
-		//byteToHex(arr);
-	     
-		//addRoundKey(arr, keyMatrix);
-		//byteToHex(arr);
-		
-		return retString(arr, msg.length());
+		return retString(arr);
 	}
 	
 	public static String decrypt(String msg, String key) {
-		int cronIndex = 0;
-		byte[][] keyMatrix = getKey(key);
-		keyMatrix = expandKey(keyMatrix, cronIndex);
+		byte[][] keyMatrix = expandKey(getKey(key));
 		byte[][] arr = arrayStart(msg);
+		byteToHex(arr);
+		addRoundKey(arr, keyMatrix, 9);
 		
-		invertByteSub(arr);
-		invertShiftRows(arr);
+		for(int i = 8; i >= 0; i--) {
+			invertByteSub(arr);
+			invertShiftRows(arr);
+			addRoundKey(arr, keyMatrix, i);
+		}
 
-		return retString(arr, msg.length());
+		return retString(arr);
 	}
 	
 	//TODO - remove once complete (used for testing)
 	public static void main(String[] args) {
-		String msg = "hoawjava.com";
+		String msg = "asdfewcvbew";
 		String key = "abcdefghijkl";
-		System.out.println(encrypt(msg, key));
-
+		msg = encrypt(msg, key);
+		System.out.println(msg);
 	}
 
 }
