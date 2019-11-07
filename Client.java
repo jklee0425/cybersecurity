@@ -1,6 +1,5 @@
 package clientServer;
 
-import loginSessionControl.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +24,8 @@ public class Client extends JFrame{
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int num1, num2, privKey, symKey;
+	private int prime, generator, randNum, id;
+	private String key;
 	private String host;
 	
 	public void buildGUI() {
@@ -55,35 +55,38 @@ public class Client extends JFrame{
 		setVisible(true);
 	}
 	
+	public String padKey(int val) {
+		String tmp = String.valueOf(val);
+		char[] arr = new char[16];
+		for(int i = 0; i < arr.length; i++) {
+			if(i < tmp.length()) {
+				arr[i] = tmp.charAt(i);
+			}
+			else {
+				arr[i] = tmp.charAt(tmp.length()-1);
+			}
+		}
+		return String.valueOf(arr);
+	}
+	
 	public void diffieHellman(){
-      		privKey = (int)(Math.random()*((100-10)+1))+10;
-		num1 = (int)(Math.random()*((100-10)+1))+10;
-		num2 = privKey - num1; //primitive root of num1
+		int tmp;
+		msgArea.append("Sending key\n");
+      	randNum = (int)(Math.random()*((100-10)+1))+10;
+		prime = 13;
+		generator = 6; 
 		try {
-			toServer.writeInt((int) (Math.pow(num2, privKey) % num1));
+			toServer.write((int) (Math.pow(generator, randNum) % prime));
 			toServer.flush();
-			symKey = (int) (Math.pow(fromServer.readInt(), privKey) % num1);
+			msgArea.append("Key sent\n");
+			id = fromServer.readInt();
+			tmp = (int) (Math.pow(fromServer.read(), randNum) % prime);
+			key = padKey(tmp);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public String encrypt(String msg, int key) {
-		String tmp = "";
-		for(int i = 0; i < msg.length(); i++) {
-			tmp += (char) (msg.charAt(i) + key);
-		}
-		return tmp;
-	}
-	
-	public String decrypt(String msg, int key) {
-		String tmp = "";
-		for(int i = 0; i < msg.length(); i++) {
-			tmp += (char) (msg.charAt(i) - key);
-		}
-		return tmp;
-	}
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
@@ -94,8 +97,6 @@ public class Client extends JFrame{
 	}
 	public Client(int port, String host) {
 		buildGUI();
-		
-		System.out.println(this.toString());
 		try {
 			this.address = InetAddress.getLocalHost();
 			this.socket = new Socket(address.getLoopbackAddress(), port);
@@ -107,12 +108,14 @@ public class Client extends JFrame{
 			msgArea.append(e.toString() + '\n');
 			e.printStackTrace(System.err);
 		}
+		diffieHellman();
 		Thread read = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while(true) {
 					try {
-						msgArea.append(fromServer.readUTF());
+						msgArea.append("Decrypting with: " + key);
+						msgArea.append(AES.decrypt(fromServer.readUTF(), key) + '\n');
 					} catch(IOException e) {
 						e.printStackTrace();
 					}
@@ -126,13 +129,13 @@ public class Client extends JFrame{
 
 	private class msgListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			String msg = host + ">" + msgField.getText().trim();
 			try {
-				toServer.writeUTF(msg + '\n');
+				toServer.writeInt(id);
+				String msg = host + id + ">" + msgField.getText().trim();
+				toServer.writeUTF(AES.encrypt(msg,key));
 				toServer.flush();
 				msgField.setText("");
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
@@ -141,11 +144,10 @@ public class Client extends JFrame{
 	private class exitListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			try {
-				toServer.writeUTF(host + " has left the chat room.\n");
+				toServer.writeUTF(host + " has left the chat room." + '\n');
 				toServer.flush();
 				dispose();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}

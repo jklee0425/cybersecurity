@@ -3,11 +3,9 @@ package clientServer;
 import java.awt.BorderLayout;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -21,7 +19,8 @@ public class Server extends JFrame{
 	private DataOutputStream toClient;
 	private DataInputStream fromClient;
 	private static ArrayList<ClientHandler> clients;
-	private int privKey, num1, num2, symKey;
+	private int prime, generator, randNum;
+	private static ArrayList<String> keys;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
@@ -36,59 +35,58 @@ public class Server extends JFrame{
 		setVisible(true);
 	}
    
-   public int primeGenerator() {
-		int[] primes = {11,13,17,19,23,29,31,37,41,43,47,53,59,61,71,73,79};
-		return primes[(int) (Math.random()*((primes.length)))];
+   
+	public String padKey(int val) {
+		String tmp = String.valueOf(val);
+		char[] arr = new char[16];
+		for(int i = 0; i < arr.length; i++) {
+			if(i < tmp.length()) {
+				arr[i] = tmp.charAt(i);
+			}
+			else {
+				arr[i] = tmp.charAt(tmp.length()-1);
+			}
+		}
+		return String.valueOf(arr);
 	}
 	
 	public void diffieHellman(){
-		privKey = (int)(Math.random()*((100-80)+1))+80;
-		num1 = primeGenerator();
-		num2 = privKey - num1; //primitive root of num1
 		try {
-			toClient.writeInt((int) (Math.pow(num2, privKey) % num1));
+			int tmp = (int) (Math.pow(this.fromClient.read(), randNum) % prime);
+			msgArea.append("Key for user " + clients.size() + ": " + String.valueOf(tmp) + '\n');
+			keys.add(padKey(tmp));
+			toClient.writeInt(keys.size() - 1);
+			toClient.writeInt((int) (Math.pow(generator, randNum) % prime));
 			toClient.flush();
-			symKey = (int) (Math.pow(fromClient.readInt(), privKey) % num1);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-   
-   public static String encrypt(String msg, int key) {
-		String tmp = "";
-		for(int i = 0; i < msg.length(); i++) {
-			tmp += (char) (msg.charAt(i) + key);
-		}
-		return tmp;
-	}
-	
-	public static String decrypt(String msg, int key) {
-		String tmp = "";
-		for(int i = 0; i < msg.length(); i++) {
-			tmp += (char) (msg.charAt(i) - key);
-		}
-		return tmp;
-	}
 	
 	public Server(int port) {
+		keys = new ArrayList<>();
+		randNum = (int)(Math.random()*((100-10)+1))+10;
+		prime = 13;
+		generator = 6;
 		buildGUI();
 		try (ServerSocket server = new ServerSocket(port)){
 			msgArea.append("Server started \n");
 			clients = new ArrayList<ClientHandler>();
 			msgArea.append("Waiting for clients... \n");
 			Socket client;
-			while(true){
+			while(true) {
 				client = server.accept();
-				msgArea.append("Client accepted at: " + port + '\n');
-			
+				msgArea.append("Client accepted at port: " + port + '\n');
 				this.fromClient = new DataInputStream(new BufferedInputStream(client.getInputStream()));
 				this.toClient = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
-				
 				ClientHandler handler = new ClientHandler(client, fromClient, toClient);
+				msgArea.append("Waiting for key\n");
+				diffieHellman();
+				msgArea.append("Key received\n");
 				clients.add(handler);
 				Thread t = new Thread(handler);
 				t.start();
+				
 			}
 			
 		} catch (IOException e) {
@@ -100,7 +98,7 @@ public class Server extends JFrame{
 		new Server(8081);
 	}
 	
-		class ClientHandler implements Runnable{
+	class ClientHandler implements Runnable{
 		
 		private DataInputStream in;
 		private DataOutputStream out;
@@ -115,13 +113,18 @@ public class Server extends JFrame{
 		@Override
 		public void run() {
 			String msg;
+			int id;
 			while(true) {
 				try {
+					id = in.readInt();
 					msg = in.readUTF();
-					msgArea.append("Got msg: " + msg);
-					for(ClientHandler user : Server.clients) {
-						user.out.writeUTF(msg);
-						user.out.flush();
+					msgArea.append("Got msg from " + id + ": " + msg + '\n');
+					msg = AES.decrypt(msg, keys.get(id));
+					for(int i = 0; i < clients.size(); i++) {
+						//TODO - fix if more then one client, only senders msg is decrypted
+						msgArea.append("Using " + i + " " + keys.get(i));
+						clients.get(i).out.writeUTF(AES.encrypt(msg, keys.get(i)));
+						clients.get(i).out.flush();
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -131,6 +134,5 @@ public class Server extends JFrame{
 		}
 		
 	}
-
 
 }
