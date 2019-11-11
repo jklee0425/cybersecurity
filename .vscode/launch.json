@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ABCFileSystem",
+            "request": "launch",
+            "mainClass": "ABCFileSystem"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - FileTree",
             "request": "launch",
             "mainClass": "FileTree"
