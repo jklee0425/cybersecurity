@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Random;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -24,8 +26,7 @@ public class Client extends JFrame{
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int prime, generator, randNum, id;
-	private String key;
+	private int prime, generator, randNum, id, key;
 	private String host;
 	
 	public void buildGUI() {
@@ -55,33 +56,15 @@ public class Client extends JFrame{
 		setVisible(true);
 	}
 	
-	public String padKey(int val) {
-		String tmp = String.valueOf(val);
-		char[] arr = new char[16];
-		for(int i = 0; i < arr.length; i++) {
-			if(i < tmp.length()) {
-				arr[i] = tmp.charAt(i);
-			}
-			else {
-				arr[i] = tmp.charAt(tmp.length()-1);
-			}
-		}
-		return String.valueOf(arr);
-	}
-	
 	public void diffieHellman(){
-		int tmp;
 		msgArea.append("Sending key\n");
-      	randNum = (int)(Math.random()*((100-10)+1))+10;
-		prime = 13;
-		generator = 6; 
 		try {
-			toServer.write((int) (Math.pow(generator, randNum) % prime));
+			toServer.writeInt((int) (Math.pow(generator, randNum) % prime));
 			toServer.flush();
 			msgArea.append("Key sent\n");
 			id = fromServer.readInt();
-			tmp = (int) (Math.pow(fromServer.read(), randNum) % prime);
-			key = padKey(tmp);
+			key = (int) (Math.pow(fromServer.readInt(), randNum) % prime);
+			msgArea.append("Received key from server: " + key + "\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -98,24 +81,28 @@ public class Client extends JFrame{
 	public Client(int port, String host) {
 		buildGUI();
 		try {
+			Random gen = new Random();
 			this.address = InetAddress.getLocalHost();
 			this.socket = new Socket(address.getLoopbackAddress(), port);
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			this.host = host;
+	      	this.randNum = gen.nextInt(9) + 1;
+			this.prime = 13;
+			this.generator = 6; 
 		}
 		catch(Exception e) {
-			msgArea.append(e.toString() + '\n');
-			e.printStackTrace(System.err);
+			e.printStackTrace();
 		}
 		diffieHellman();
 		Thread read = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				String tmp;
 				while(true) {
 					try {
-						msgArea.append("Decrypting with: " + key);
-						msgArea.append(AES.decrypt(fromServer.readUTF(), key) + '\n');
+						tmp = fromServer.readUTF();
+						msgArea.append(AES.decrypt(tmp, key).trim() + '\n');
 					} catch(IOException e) {
 						e.printStackTrace();
 					}
@@ -131,7 +118,7 @@ public class Client extends JFrame{
 		public void actionPerformed(ActionEvent e) {
 			try {
 				toServer.writeInt(id);
-				String msg = host + id + ">" + msgField.getText().trim();
+				String msg = id + ">" + msgField.getText().trim();
 				toServer.writeUTF(AES.encrypt(msg,key));
 				toServer.flush();
 				msgField.setText("");
