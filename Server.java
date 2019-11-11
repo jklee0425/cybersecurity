@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Random;
+
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -20,7 +22,7 @@ public class Server extends JFrame{
 	private DataInputStream fromClient;
 	private static ArrayList<ClientHandler> clients;
 	private int prime, generator, randNum;
-	private static ArrayList<String> keys;
+	private static ArrayList<Integer> keys;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
@@ -34,27 +36,12 @@ public class Server extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
-   
-   
-	public String padKey(int val) {
-		String tmp = String.valueOf(val);
-		char[] arr = new char[16];
-		for(int i = 0; i < arr.length; i++) {
-			if(i < tmp.length()) {
-				arr[i] = tmp.charAt(i);
-			}
-			else {
-				arr[i] = tmp.charAt(tmp.length()-1);
-			}
-		}
-		return String.valueOf(arr);
-	}
 	
 	public void diffieHellman(){
 		try {
-			int tmp = (int) (Math.pow(this.fromClient.read(), randNum) % prime);
-			msgArea.append("Key for user " + clients.size() + ": " + String.valueOf(tmp) + '\n');
-			keys.add(padKey(tmp));
+			int tmp = (int) (Math.pow(this.fromClient.readInt(), randNum) % prime);
+			msgArea.append("Key for user " + keys.size() + ": " + tmp + '\n');
+			keys.add(tmp);
 			toClient.writeInt(keys.size() - 1);
 			toClient.writeInt((int) (Math.pow(generator, randNum) % prime));
 			toClient.flush();
@@ -64,10 +51,11 @@ public class Server extends JFrame{
 	}
 	
 	public Server(int port) {
-		keys = new ArrayList<>();
-		randNum = (int)(Math.random()*((100-10)+1))+10;
-		prime = 13;
-		generator = 6;
+		Random gen = new Random();
+		this.keys = new ArrayList<>();
+		this.randNum = gen.nextInt(9) + 1;
+		this.prime = 13;
+		this.generator = 6;
 		buildGUI();
 		try (ServerSocket server = new ServerSocket(port)){
 			msgArea.append("Server started \n");
@@ -120,12 +108,14 @@ public class Server extends JFrame{
 					msg = in.readUTF();
 					msgArea.append("Got msg from " + id + ": " + msg + '\n');
 					msg = AES.decrypt(msg, keys.get(id));
-					for(int i = 0; i < clients.size(); i++) {
-						//TODO - fix if more then one client, only senders msg is decrypted
-						msgArea.append("Using " + i + " " + keys.get(i));
-						clients.get(i).out.writeUTF(AES.encrypt(msg, keys.get(i)));
-						clients.get(i).out.flush();
-					}
+					
+					msgArea.append(msg.trim() + '\n');
+						for(int i = clients.size()-1; i >= 0; i--) {
+							//TODO - fix if more then one client, only senders msg is decrypted
+							msgArea.append("Sending msg to user " + i + " with key " + keys.get(i) + '\n');
+							clients.get(i).out.writeUTF(AES.encrypt(msg, keys.get(i)));
+							clients.get(i).out.flush();
+						}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
