@@ -2,6 +2,47 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - FileTree",
+            "request": "launch",
+            "mainClass": "FileTree"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Client",
+            "request": "launch",
+            "mainClass": "Client",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ChatRoom",
+            "request": "launch",
+            "mainClass": "ChatRoom",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Session",
+            "request": "launch",
+            "mainClass": "Session",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - AES",
+            "request": "launch",
+            "mainClass": "AES",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Login",
             "request": "launch",
             "mainClass": "loginSessionControl.Login"

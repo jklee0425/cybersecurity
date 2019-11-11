@@ -2,8 +2,9 @@ package loginSessionControl;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalTime;
 import javax.swing.*;
-import clientServer.*;
+import ClientServer.*;
 
 public class Login extends JFrame {
     /**
@@ -15,7 +16,6 @@ public class Login extends JFrame {
     private JLabel lbUsername;
     private JLabel lbPassword;
     private JButton btnLogin;
-    private JButton btnSignup;
 
     public Login() {
         JPanel userInputPanel = new JPanel();
@@ -37,12 +37,9 @@ public class Login extends JFrame {
 
         JPanel btnPanel = new JPanel();
         btnLogin = new JButton("Log in");
-        btnSignup = new JButton("Sign up");
         btnLogin.addActionListener(new loginListener());
-        btnSignup.addActionListener(new signUpListener());
 
         btnPanel.add(btnLogin);
-        btnPanel.add(btnSignup);
 
         setLayout(new BorderLayout());
         add(userInputPanel, BorderLayout.CENTER);
@@ -57,16 +54,10 @@ public class Login extends JFrame {
     private class loginListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if(isAllowed(Helper.getUsername(tfUsername))){
-                new Client(8081, Helper.getUsername(tfUsername));
+                new ChatRoom(8081, Helper.getUsername(tfUsername));
             }
         }
     }
-    private class signUpListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            //TODO
-        }
-    }
-
     /**
      * This method retrieves accessible time of the user from the database
      * and returns boolean according to the retrieved value and the current time
@@ -75,9 +66,10 @@ public class Login extends JFrame {
      */
     private boolean isAllowed(String username){
         // Retrieve allowed time for the user in the system.
-        String[] accessibleTime = {"15:30", "14:40"};
+        String[] accessibleTime = { "15:30", "14:40" }; // example
         LocalTime now = LocalTime.now();
-        return now.isAfter(accessibleTime[0]) && now.isBefore(accessibleTime[1]);
+        return now.isAfter(LocalTime.parse(accessibleTime[0])) && 
+            now.isBefore(LocalTime.parse(accessibleTime[1]));
     }
     /**
      * Check if the pw matches the username
@@ -86,8 +78,9 @@ public class Login extends JFrame {
      * @return return true if the password matches the username, otherwise false.
      */
     private boolean authenticate(String username, byte[] pw) {
-        // TODO
-        return true;
+        // TODO; Example
+        String sql = "SELECT pwHash FROM users WHERE username=" + username;
+        return sql.execute().eqauls(pw);
     }
     public static void main(String[] args) {
         new Login();

@@ -1,37 +1,49 @@
-import java.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class Session extends JFrame {
 
-    private JBtutton[] btnChatrooms;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    // private JButton[] btnChatrooms;
     private String[] chatroomTitles;
     private JLabel lbUserInfo;
     private JButton btnCreate;
     private JButton btnAccess;
     private JButton btnLogOut;
+    private String username;
 
+    /**
+     *  Logged in as User         [Sign Out]
+     *  ----------- chatrooms ---------------
+     *  username1's chatroom        [JOIN]
+     *  usernmae2's chatroom        [JOIN]
+     *  ...
+     *  -------------------------------------
+     *  [CREATE CHATROOM]    [ACCESS FILESYSTEM]
+     */
     public Session(String username) {
-        // TODO : Layout
+        this.username = username;
         JPanel userInfoPn = new JPanel();
-        userInfo = new JLabel("Logged in as " + username);
+        lbUserInfo = new JLabel("Logged in as " + username);
         btnLogOut = new JButton("Sign Out");
         btnLogOut.addActionListener(new logOutListener());
-        userInfoPn.add(lbUserInfo);
-        userInfoPn.add(btnLogOut);
+        userInfoPn.setLayout(new BorderLayout());
+        userInfoPn.add(lbUserInfo, BorderLayout.LINE_START);
+        userInfoPn.add(btnLogOut, BorderLayout.LINE_END);
 
-        /**
-         *  idea
-         *  ----------- chatrooms ---------------
-         *  username1's chatroom        JOIN(btn)
-         *  usernmae2's chatroom        JOIN(btn)
-         *  ...
-         *  -------------------------------------
-         *  
-         */
+        for (int i = 1; i < 4; i++) {
+            chatroomTitles[i - 1] = "username" + i + "'s chatroom";
+        }
         JPanel chatroomPn = new JPanel();
-        for(int i = 0; i < btnChatrooms.length(); i++){
+        for(int i = 0; i < 3; i++) {
             JLabel lbTitle = new JLabel(chatroomTitles[i]);
             JButton btnJoin = new JButton("Join");
             btnJoin.addActionListener(new joinListener());
@@ -44,10 +56,15 @@ public class Session extends JFrame {
         btnCreate.addActionListener(new createListener());
         btnAccess = new JButton("Access File System");
         btnAccess.addActionListener(new accessListener());
-        btnPn.add(btnCreate);
-        btnPn.add(btnAccess);
+        btnPn.setLayout(new BorderLayout());
+        btnPn.add(btnCreate, BorderLayout.WEST);
+        btnPn.add(btnAccess, BorderLayout.EAST);
 
-        // TODO
+        setLayout(new BorderLayout());
+        add(userInfoPn, BorderLayout.PAGE_START);
+        add(chatroomPn, BorderLayout.CENTER);
+        add(btnPn, BorderLayout.PAGE_END);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     /**
@@ -56,7 +73,6 @@ public class Session extends JFrame {
     private class joinListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             // TODO
-            new ChatRoom(getLocalPort(), username);
         }
     }
     /**
@@ -65,7 +81,7 @@ public class Session extends JFrame {
     private class createListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             // TODO
-            new ChatRoom(0000, username);
+            new ChatRoom(0, username);
         }
     }
     /**
@@ -74,7 +90,7 @@ public class Session extends JFrame {
     private class accessListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             // TODO
-            new FileSystem(username);
+            new ABCFileSystem();
         }
     }
     /**
@@ -83,7 +99,11 @@ public class Session extends JFrame {
     private class logOutListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             // TODO
-            system.exit();
+            System.exit(0);
         }
+    }
+
+    public static void main(String[] args) {
+        new Session("");
     }
 }
