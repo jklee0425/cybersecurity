@@ -20,6 +20,8 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 public class Client extends JFrame{
+	//@author Armaan Gill(100295504)
+	//@summary Creates a client for a chatroom
 	
 	private JTextArea msgArea;
 	private JTextField msgField;
@@ -30,12 +32,13 @@ public class Client extends JFrame{
 	private Socket socket;
 	private int prime, generator, randNum, id, key;
 	private String host;
+	private boolean runnable = true;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
 		final int FRAME_HEIGHT = 200;
 		
-		JPanel panel = new JPanel();
+	JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
 
 		msgField = new JTextField("");
@@ -75,20 +78,37 @@ public class Client extends JFrame{
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
-		menuExit.addMenuListener(new MenuListener(){
-			@Override
-			public void menuSelected(MenuEvent e) {
-				System.out.println("exit listener");
-				try {
-					toServer.writeUTF(host + " has left the chat room." + '\n');
-					toServer.flush();
-					dispose();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		});
 		menuBar.add(menuExit);
+	    menuExit.addMenuListener(new MenuListener() {
+	    	
+	    	@Override
+	    	public void menuSelected(MenuEvent e) {
+					try {
+						runnable = false;
+						String send = id + " has left";
+						msgArea.append("Exiting");
+						toServer.writeInt(id);
+						toServer.writeUTF(AES.encrypt(String.valueOf(send.hashCode()), key));
+						toServer.writeUTF(AES.encrypt(send,key));
+						toServer.flush();
+						dispose();
+						socket.close();
+						toServer.close();
+						fromServer.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+		      }
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+			}
+
+			@Override
+			public void menuCanceled(MenuEvent e) {
+			}
+
+		    });
 		setJMenuBar(menuBar);
 	}
 	public Client(int port, String host) {
@@ -107,15 +127,16 @@ public class Client extends JFrame{
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		msgArea.append("There is a 14 character limit for messages\n");
 		diffieHellman();
 		Thread read = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String tmp;
-				while(true) {
+				String msg;
+				while(runnable == true) {
 					try {
-						tmp = fromServer.readUTF();
-						msgArea.append(AES.decrypt(tmp, key).trim() + '\n');
+						msg = fromServer.readUTF();
+						msgArea.append(AES.decrypt(msg, key).trim() + '\n');
 					} catch(IOException e) {
 						e.printStackTrace();
 					}
@@ -132,6 +153,7 @@ public class Client extends JFrame{
 			try {
 				toServer.writeInt(id);
 				String msg = id + ">" + msgField.getText().trim();
+				toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
 				toServer.writeUTF(AES.encrypt(msg,key));
 				toServer.flush();
 				msgField.setText("");
@@ -141,20 +163,6 @@ public class Client extends JFrame{
 		}
 	}
 	
-	private class exitListener implements MenuListener{
-		@Override
-		public void menuSelected(MenuEvent e) {
-			System.out.println("exit listener");
-			try {
-				toServer.writeUTF(host + " has left the chat room." + '\n');
-				toServer.flush();
-				dispose();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
-
 	public static void main(String[] args) {
 		new Client(8081, "User");
 	}

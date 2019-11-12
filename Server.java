@@ -16,13 +16,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class Server extends JFrame{
+	//@author Armaan Gill(100295504)
+	//@summary Creates a server that accepts clients for a chatroom
 	
 	private JTextArea msgArea;
 	private DataOutputStream toClient;
 	private DataInputStream fromClient;
 	private static ArrayList<ClientHandler> clients;
 	private int prime, generator, randNum;
-	private static ArrayList<Integer> keys;
+	private ArrayList<Integer> keys;
 	
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
@@ -58,9 +60,9 @@ public class Server extends JFrame{
 		this.generator = 6;
 		buildGUI();
 		try (ServerSocket server = new ServerSocket(port)){
-			msgArea.append("Server started \n");
+			msgArea.append("Server started\n");
 			clients = new ArrayList<ClientHandler>();
-			msgArea.append("Waiting for clients... \n");
+			msgArea.append("Waiting for clients...\n");
 			Socket client;
 			while(true) {
 				client = server.accept();
@@ -100,22 +102,35 @@ public class Server extends JFrame{
 		
 		@Override
 		public void run() {
-			String msg;
+			String msg, hash;
 			int id;
 			while(true) {
 				try {
 					id = in.readInt();
+					hash = AES.decrypt(in.readUTF(),keys.get(id)).trim();
 					msg = in.readUTF();
 					msgArea.append("Got msg from " + id + ": " + msg + '\n');
 					msg = AES.decrypt(msg, keys.get(id));
-					
-					msgArea.append(msg.trim() + '\n');
-						for(int i = clients.size()-1; i >= 0; i--) {
-							//TODO - fix if more then one client, only senders msg is decrypted
-							msgArea.append("Sending msg to user " + i + " with key " + keys.get(i) + '\n');
-							clients.get(i).out.writeUTF(AES.encrypt(msg, keys.get(i)));
-							clients.get(i).out.flush();
+					if(String.valueOf(msg.trim().hashCode()).equals(hash)) {
+						msgArea.append(msg.trim() + '\n');
+						if(msg.trim().equals(id+" has left")) {
+							keys.set(id, null);
+							clients.set(id, null);
+							clients.get(id).out.writeUTF("");//client is still waiting for input after exiting
+							clients.get(id).out.flush();
 						}
+						for(int i = clients.size()-1; i >= 0; i--) {
+							if(clients.get(i) != null) {
+								msgArea.append("Sending msg to user " + i + " with key " + keys.get(i) + '\n');
+								clients.get(i).out.writeUTF(AES.encrypt(msg, keys.get(i)));
+								clients.get(i).out.flush();
+							}
+						}
+					}
+					else {
+						clients.get(id).out.writeUTF(AES.encrypt("Resend message", keys.get(id)));
+						clients.get(id).out.flush();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
