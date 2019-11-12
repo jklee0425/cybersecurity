@@ -1,3 +1,6 @@
+
+import java.util.ArrayList;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -41,5 +44,13 @@ public class AccessControl {
     
     public static void showAllCommands(){
         System.out.println("SHOWING ALL THE COMMANDS");
+    }
+    
+    public static boolean createViewCheck(ArrayList<String> listCol, ArrayList<String> aliasCol){
+        //if the list are the same size, then it is correct
+        if(listCol.size() == aliasCol.size()){
+            return true;
+        }
+        return false;
     }
 }

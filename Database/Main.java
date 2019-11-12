@@ -1,9 +1,12 @@
 import java.sql.*;
 import java.util.Scanner;
 import java.io.Console;
+import java.util.ArrayList;
 public class Main {
     
  public static void main(String[] args) throws SQLException{
+ 
+   
      
      Scanner input = new Scanner(System.in);
      String command = "empty";
@@ -37,6 +40,12 @@ public class Main {
                      AccessControl.showAllCommands();
                  }else if(command.equals("isLoggedIn")){
                      System.out.println(currentUser.isLoggedIn());
+                 }else if(command.equals("certainView")){
+                     System.out.println("Please enter a certain view name");
+                     //list all possible view names
+                     String viewName = input.next();
+                     //if the viewname is not in the list of view, exit
+                     currentUser.listInventoryFromCertainView(viewName);
                  }else{
                      System.out.println("Unknown command entered");
                  }
@@ -58,24 +67,46 @@ public class Main {
              Custodian currentUser = new Custodian(username, password);
              currentUser.login();
              while(currentUser.isLoggedIn()){
-                 System.out.println("Enter command");
+                 System.out.println("Enter user command");
                  command = input.next();
                  if(command.equals("logout")){
                      currentUser.logOff();
-                     System.out.println("Logging Out");
+                     System.out.println("   Logging Out");
                  }else if(command.equals("showUsers")){
                   currentUser.showUsers();
                  }else if(command.equals("createView")){
-                     System.out.println("Enter table name to create view");
+                     System.out.println("   Enter table name to create view");
                      String tableName = input.next();
                      
-                     System.out.println("Enter view name");
+                     System.out.println("   Enter view name");
                      String viewName = input.next();
                      String colName = "";
+                     String aliasName = "";
+                     ArrayList<String> listColNames = new ArrayList<String>();
+                     ArrayList<String> listAlias = new ArrayList<String>();
                      do{
-                     System.out.println("Enter col_names, 0 to terminate");
-                     colName = input.next();
+                         System.out.println("   Current number of col selected: " + listColNames.size());
+                        System.out.println("   Enter col_names, 0 to terminate");       
+                     
+                        colName = input.next();
+                        //error check later
+                        listColNames.add(colName);
+                        
+                        System.out.println("   Enter alias for column name " + colName);
+                        aliasName = input.next();
+                        //error check later
+                        listAlias.add(aliasName);
                      }while(!colName.equals("0"));
+                     
+                     if(AccessControl.createViewCheck(listColNames, listAlias)){
+                         System.out.println("Success in creating view");
+                         currentUser.createView(tableName,viewName,listColNames,listAlias);
+                         
+                         
+                         
+                     }else{
+                         System.out.println("Failure in creating view");
+                     }
                  }
                  else{
                      System.out.println("Invalid input");

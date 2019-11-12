@@ -1,5 +1,6 @@
 
 import java.sql.*;
+import java.util.ArrayList;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -64,11 +65,12 @@ public class Warehouse implements UserInterface {
     }
     
     public boolean isLoggedIn() throws SQLException {
-        myConn.close();
+       
         return this.loggedIn;
     }
     
-    public boolean logOff(){
+    public boolean logOff() throws SQLException {
+        myConn.close();
         this.loggedIn = false;
         return this.loggedIn;
     }
@@ -79,7 +81,27 @@ public class Warehouse implements UserInterface {
         PreparedStatement preppedStatement = myConn.prepareStatement(sql);
         
     }
-
+    
+    //ERROR HERE FIX
+    public void listInventoryFromCertainView(String viewName) throws SQLException{
+        myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/Inventory", this.dbEmp, this.dbPass);
+        String sql = "SELECT * FROM ?";
+        PreparedStatement preparedStatement = myConn.prepareStatement(sql);
+        preparedStatement.setString(1,viewName);
+        myRs = preparedStatement.executeQuery();
+        
+        ResultSetMetaData meta = myRs.getMetaData();
+        int count = meta.getColumnCount();
+        ArrayList<String> columnNames = new ArrayList<String>();
+        for(int i = 0; i < count; i++){
+            String col_name = meta.getColumnName(i);
+            columnNames.add(col_name);
+        }
+        
+        for(String i : columnNames){
+            System.out.println(i);
+        }
+    }
 
 
 

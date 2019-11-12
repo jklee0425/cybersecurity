@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.ArrayList;
 public class Custodian extends SecurityManager implements UserInterface {
     public String role;
     private boolean loggedIn;
@@ -85,11 +86,30 @@ public class Custodian extends SecurityManager implements UserInterface {
         return "implement grantUser later";
     }
     
-    public String createView(String table, String nameOfView, String[] actualColName, String[] viewColName) throws SQLException{
+    public void createView(String table, String nameOfView, ArrayList<String> actualColName, ArrayList<String> viewColName) throws SQLException{
         this.currentDatabase = "Inventory";
         myConn.close();
         myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/"+this.currentDatabase, username, password);
-        String sql = "SELECT * FROM Planes";
+        
+        String sql = "CREATE VIEW ";
+        sql += nameOfView;
+        sql += " AS SELECT ";
+        for(int i = 0; i < actualColName.size() - 1; i++){
+            
+                sql += actualColName.get(i);
+                sql += " AS ";
+                
+                sql += "'" +viewColName.get(i) + "',";
+                
+          
+            
+        }
+        String subSql = sql.substring(0, sql.length() -1);
+        
+        subSql += " FROM ";
+        subSql += table;
+        System.out.println(subSql);
+               /*
         PreparedStatement preparedStatement = myConn.prepareStatement(sql);
         myRs = preparedStatement.executeQuery();
         while(myRs.next()){
@@ -104,7 +124,7 @@ public class Custodian extends SecurityManager implements UserInterface {
         myConn.close();
         myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/"+this.currentDatabase, username, password);
         */
-        return "implement warehouse get table all later";
+        
     }
     
     public boolean isLoggedIn() {
