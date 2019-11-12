@@ -391,25 +391,4 @@ public class AES {
 		addRoundKey(arr, keyMatrix, 0);
 		return retString(arr);
 	}
-	
-	public static void printMatrix(int[][] matrix) {
-		for(int i = 0; i < matrix.length; i++) {
-			for(int j = 0; j < matrix[i].length; j++) {
-				System.out.print(matrix[i][j] + " ");
-			}
-			System.out.println();
-		}
-	}
-	
-	//TODO - remove main once complete (used for testing)
-	public static void main(String[] args) {
-		String msg = "abcdefghijklrewa";
-		System.out.println(msg);
-		int key = 2;
-		msg = encrypt(msg, key);
-		System.out.println(msg);
-		msg = decrypt(msg, key);
-		System.out.print(msg);
-	}
-
 }
