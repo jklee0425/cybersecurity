@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Session",
+            "request": "launch",
+            "mainClass": "Session"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - ABCFileSystem",
             "request": "launch",
             "mainClass": "ABCFileSystem"

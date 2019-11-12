@@ -38,7 +38,7 @@ public class Session extends JFrame {
         userInfoPn.setLayout(new BorderLayout());
         userInfoPn.add(lbUserInfo, BorderLayout.LINE_START);
         userInfoPn.add(btnLogOut, BorderLayout.LINE_END);
-
+        chatroomTitles = new String[4];
         for (int i = 1; i < 4; i++) {
             chatroomTitles[i - 1] = "username" + i + "'s chatroom";
         }
@@ -104,6 +104,6 @@ public class Session extends JFrame {
     }
 
     public static void main(String[] args) {
-        new Session("");
+        new Session("user");
     }
 }

@@ -3,6 +3,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.file.FileSystems;
 
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -23,6 +25,8 @@ public class ABCFileSystem {
     JButton btnUpload;
 
     public ABCFileSystem() {
+        
+        buildGUI();
         fs = newFileSystem(PATH);
         fc = new JFileChooser();
 
@@ -49,7 +53,7 @@ public class ABCFileSystem {
         add(new ScrollPane(logArea), BorderLayout.SOUTH);
     }
 
-    private static void buildGUI() {
+    private void buildGUI() {
         JFrame frame = new JFrame("ABC Airlines File System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(frame, new ABCFileSystem());
@@ -59,10 +63,9 @@ public class ABCFileSystem {
 
     // reference : https://docs.oracle.com/javase/tutorial/uiswing/components/filechooser.html
     public void actionPerformed(ActionEvent e) {
+        int retVal;
         switch(e.getSource()) {
-            int retVal;
             case btnFind:
-                retVal = fc.showDialog(ABCFileSystem.this, "Find");
                 String fName = userInput.getText();
                 logArea.append("Looking for: " + fName + "\n");
                 logArea.setCaretPosition(log.getDocument().getLength());
@@ -71,32 +74,31 @@ public class ABCFileSystem {
                 break;
             case btnChoose:
                 // TODO
-                retVal = fc.showDialog(ABCFileSystem.this, "Choose");
-                if (retVal == JFileChooser.APPROVE_OPTION) {
+                // retVal = fc.showDialog(ABCFileSystem.this, "Choose");
+                // if (retVal == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
                     logArea.append("File Selected: " + file.getName() + "\n");
                     logArea.setCaretPosition(log.getDocument().getLength());
-                }
+                // }
                 break;
             case btnUpload:
                 // TODO
-                retVal = fc.showDialog(ABCFileSystem.this, "Upload");
-                if (retVal == JFileChooser.APPROVE_OPTION){
                     logArea.append("File Uploaded: " + file.getName() + "\n");
                     logArea.setCaretPosition(log.getDocument().getLength());
-                }
+                    
                 break;
             default:
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                //Turn off metal's use of bold fonts
-                UIManager.put("swing.boldMetal", Boolean.FALSE); 
-                buildGUI();
-            }
-        });
+        new ABCFileSystem();
+        // SwingUtilities.invokeLater(new Runnable() {
+        //     public void run() {
+        //         //Turn off metal's use of bold fonts
+        //         UIManager.put("swing.boldMetal", Boolean.FALSE); 
+        //         buildGUI();
+        //     }
+        // });
     }
 }

@@ -16,6 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 public class Client extends JFrame{
 	
@@ -73,8 +75,19 @@ public class Client extends JFrame{
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
-		menuExit.addActionListener(new exitListener());
-
+		menuExit.addMenuListener(new MenuListener(){
+			@Override
+			public void menuSelected(MenuEvent e) {
+				System.out.println("exit listener");
+				try {
+					toServer.writeUTF(host + " has left the chat room." + '\n');
+					toServer.flush();
+					dispose();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		menuBar.add(menuExit);
 		setJMenuBar(menuBar);
 	}
@@ -128,8 +141,10 @@ public class Client extends JFrame{
 		}
 	}
 	
-	private class exitListener implements ActionListener{
-		public void actionPerformed(ActionEvent e) {
+	private class exitListener implements MenuListener{
+		@Override
+		public void menuSelected(MenuEvent e) {
+			System.out.println("exit listener");
 			try {
 				toServer.writeUTF(host + " has left the chat room." + '\n');
 				toServer.flush();
