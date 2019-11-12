@@ -12,15 +12,21 @@ public class AccessControl {
     private static String SUPERUSER = "TOP ADMIN";
     private static String EMPLOYEE = "EMPLOYEE";
     private static String WAREHOUSE = "WAREHOUSE";
-
-    //only TOP_ADMIN role can write to the server
+    private static boolean[] readWrite = new boolean[2];
     public static boolean writePrivelege(String userRole){
-        return userRole == SUPERUSER;
+        //only TOP_ADMIN role can write to the server
+        if(userRole != SUPERUSER){
+            return false;
+        }
+        return true;
     }
     
-    //employee from TOP ADMIN to EMPLOYE can read
     public static boolean readPrivelege(String userRole){
-        return userRole == SUPERUSER || userRole == EMPLOYEE;
+    //employee from TOP ADMIN to EMPLOYE can read
+    if(userRole != SUPERUSER || userRole != EMPLOYEE){
+        return false;
+    }
+    return true;
     }
     
     public static String showCommands(){
@@ -28,6 +34,12 @@ public class AccessControl {
     }
     
     public static String getGrantsUsername(String grantString){
-        return grantString.substring(11,grantString.length());
+        String substring = grantString.substring(11,grantString.length());
+        return substring;
+    }
+    
+    
+    public static void showAllCommands(){
+        System.out.println("SHOWING ALL THE COMMANDS");
     }
 }
