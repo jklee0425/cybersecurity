@@ -20,7 +20,6 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 public class Client extends JFrame{
-	//@author Armaan Gill(100295504)
 	//@summary Creates a client for a chatroom
 	
 	private JTextArea msgArea;

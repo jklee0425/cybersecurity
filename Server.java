@@ -16,7 +16,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class Server extends JFrame{
-	//@author Armaan Gill(100295504)
 	//@summary Creates a server that accepts clients for a chatroom
 	
 	private JTextArea msgArea;
