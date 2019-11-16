@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ABCFileSystem",
+            "request": "launch",
+            "mainClass": "client.ABCFileSystem",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Session",
             "request": "launch",
             "mainClass": "Session"

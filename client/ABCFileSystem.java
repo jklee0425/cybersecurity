@@ -1,3 +1,5 @@
+package client;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -68,8 +70,6 @@ public class ABCFileSystem extends JFrame implements ActionListener, MouseListen
         // fs = newFileSystem(PATH);
         fc = new JFileChooser();
     }
-    // reference :
-    // https://docs.oracle.com/javase/tutorial/uiswing/components/filechooser.htm
     @Override
     public void actionPerformed(ActionEvent e) {
         int retVal;

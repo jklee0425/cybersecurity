@@ -65,8 +65,4 @@ public class Helper {
 
         return factory.generateSecret(spec).getEncoded();
     }
-
-	public static String getUsername(JTextField tf) {
-		return tf.getText().trim();
-	}
 }

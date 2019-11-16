@@ -1,9 +1,19 @@
 package loginSessionControl;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.time.LocalTime;
-import javax.swing.*;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+
+import client.ChatRoom;
 
 public class Login extends JFrame {
     /**
@@ -79,7 +89,7 @@ public class Login extends JFrame {
     private boolean authenticate(String username, byte[] pw) {
         // TODO; Example
         String sql = "SELECT pwHash FROM users WHERE username=" + username;
-        return sql.execute().eqauls(pw);
+        return true;//sql.execute().eqauls(pw);
     }
     public static void main(String[] args) {
         new Login();
