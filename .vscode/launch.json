@@ -2,6 +2,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - FileBrowser",
+            "request": "launch",
+            "mainClass": "FileBrowser",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - testFS",
+            "request": "launch",
+            "mainClass": "testFS",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - testFS",
+            "request": "launch",
+            "mainClass": "client.testFS",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Main",
+            "request": "launch",
+            "mainClass": "Database.Main",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - ABCFileSystem",
             "request": "launch",
             "mainClass": "client.ABCFileSystem",

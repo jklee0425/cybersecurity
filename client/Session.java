@@ -1,36 +1,34 @@
-package client;
+
 
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class Session extends JFrame {
+public class Session extends JFrame implements ListSelectionListener {
 
     /**
      *
      */
     private static final long serialVersionUID = 1L;
-    // private JButton[] btnChatrooms;
-    private String[] chatroomTitles;
+    private JList list;
+    private DefaultListModel chatRoomList;
     private JLabel lbUserInfo;
+    private JButton btnJoin;
     private JButton btnCreate;
     private JButton btnAccess;
     private JButton btnLogOut;
     private String username;
 
-    /**
-     *  Logged in as User         [Sign Out]
-     *  ----------- chatrooms ---------------
-     *  username1's chatroom        [JOIN]
-     *  usernmae2's chatroom        [JOIN]
-     *  ...
-     *  -------------------------------------
-     *  [CREATE CHATROOM]    [ACCESS FILESYSTEM]
-     */
+    
     public Session(String username) {
         this.username = username;
         JPanel userInfoPn = new JPanel();
@@ -40,33 +38,36 @@ public class Session extends JFrame {
         userInfoPn.setLayout(new BorderLayout());
         userInfoPn.add(lbUserInfo, BorderLayout.LINE_START);
         userInfoPn.add(btnLogOut, BorderLayout.LINE_END);
-        chatroomTitles = new String[4];
+        chatRoomList = new DefaultListModel();
         for (int i = 1; i < 4; i++) {
-            chatroomTitles[i - 1] = "username" + i + "'s chatroom";
+            chatRoomList.addElement("username" + i + "'s chatroom");
         }
-        JPanel chatroomPn = new JPanel();
-        for(int i = 0; i < 3; i++) {
-            JLabel lbTitle = new JLabel(chatroomTitles[i]);
-            JButton btnJoin = new JButton("Join");
-            btnJoin.addActionListener(new joinListener());
-            chatroomPn.add(lbTitle);
-            chatroomPn.add(btnJoin);
-        }
+        list = new JList(chatRoomList);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setSelectedIndex(0);
+        list.addListSelectionListener(this);
+        list.setVisibleRowCount(5);
+        JScrollPane listScrollPane = new JScrollPane(list);
 
         JPanel btnPn = new JPanel();
+        btnJoin = new JButton("Join selected Chatroom");
+        btnJoin.addActionListener(new joinListener());
         btnCreate = new JButton("Create Chatroom");
         btnCreate.addActionListener(new createListener());
         btnAccess = new JButton("Access File System");
         btnAccess.addActionListener(new accessListener());
         btnPn.setLayout(new BorderLayout());
-        btnPn.add(btnCreate, BorderLayout.WEST);
+        btnPn.add(btnJoin, BorderLayout.WEST);
+        btnPn.add(btnCreate, BorderLayout.CENTER);
         btnPn.add(btnAccess, BorderLayout.EAST);
 
         setLayout(new BorderLayout());
         add(userInfoPn, BorderLayout.PAGE_START);
-        add(chatroomPn, BorderLayout.CENTER);
+        add(listScrollPane, BorderLayout.CENTER);
         add(btnPn, BorderLayout.PAGE_END);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(700, 700);
+        setVisible(true);
     }
 
     /**
@@ -74,9 +75,20 @@ public class Session extends JFrame {
      */
     private class joinListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            // TODO
+            int index = list.getSelectedIndex();
+            int size = chatRoomList.getSize();
+ 
+            if (size == 0) { // There is no chatroom, disable the join button.
+                btnJoin.setEnabled(false);
+ 
+            } else { //Select an index.
+                // TODO 
+                list.setSelectedIndex(index);
+                list.ensureIndexIsVisible(index);
+            }
         }
     }
+
     /**
      * Create a new chat room.
      */
@@ -86,6 +98,7 @@ public class Session extends JFrame {
             new ChatRoom(0, username);
         }
     }
+
     /**
      * Access the file system
      */
@@ -95,6 +108,7 @@ public class Session extends JFrame {
             new ABCFileSystem();
         }
     }
+
     /**
      * Terminate the session
      */
@@ -107,5 +121,20 @@ public class Session extends JFrame {
 
     public static void main(String[] args) {
         new Session("user");
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (e.getValueIsAdjusting() == false) {
+ 
+            if (list.getSelectedIndex() == -1) {
+            //No selection, disable join button.
+                btnJoin.setEnabled(false);
+ 
+            } else {
+            //Selection, enable the fire button.
+                btnJoin.setEnabled(true);
+            }
+        }
     }
 }

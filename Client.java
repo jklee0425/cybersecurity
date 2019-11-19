@@ -37,7 +37,7 @@ public class Client extends JFrame{
 		final int FRAME_WIDTH = 700;
 		final int FRAME_HEIGHT = 200;
 		
-	JPanel panel = new JPanel();
+		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
 
 		msgField = new JTextField("");
