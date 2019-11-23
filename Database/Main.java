@@ -2,12 +2,13 @@ import java.sql.*;
 import java.util.Scanner;
 import java.io.Console;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 public class Main {
     
  public static void main(String[] args) throws SQLException{
- 
-   
-     
+     Salesperson sales = new Salesperson("salesperson","salesperson");
+     sales.sell("A380","Boeing",50);
+     /*
      Scanner input = new Scanner(System.in);
      String command = "empty";
      do{
@@ -15,9 +16,6 @@ public class Main {
          command = input.next();
          
          //Warehouse commands
-         
-         
-         
          
          if(command.equals("Warehouse")){
              //Get user info to input
@@ -131,6 +129,11 @@ public class Main {
      //testCust.createView();
     
      */
+     
+    
     }
+ 
 
 }
+
+

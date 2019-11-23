@@ -1,29 +1,31 @@
 import java.sql.*;
 import java.util.ArrayList;
-public class Custodian extends SecurityManager implements UserInterface {
-    public String role;
+import java.util.List;
+public class Custodian extends SecurityManager {
+    public String role = "Custodian";
     private boolean loggedIn;
-    private String username;
-    private String password;
+
     private String currentDatabase;
     private Connection myConn= null;
-    
-    //implement another connection maybe to connect to the database?
+    private List<Integer> keys;
     private Statement myStmt = null;
     private ResultSet myRs = null;
     
-    public Custodian(String username, String password){
+    public Custodian(String username, String password) throws SQLException{
         //just to initalize the object
-        this.username = username;
-        this.password = password;
+        login(username,password);
+        
     }
     //for a custodian they will log in directly with a database account
-    @Override
-    public void login()throws SQLException{
+
+    private void login(String username,String password){
        try{
-           //connect to mysql on google cloud
+           keys = new ArrayList<>();
+           getKeys(username,password);
+           //first obtain the keys
             myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/Accounts", username, password);
-            this.currentDatabase = "Accounts";
+            
+            
             
         }catch(SQLException e){
             this.loggedIn = false;
@@ -86,46 +88,30 @@ public class Custodian extends SecurityManager implements UserInterface {
         return "implement grantUser later";
     }
     
-    public void createView(String table, String nameOfView, ArrayList<String> actualColName, ArrayList<String> viewColName) throws SQLException{
-        this.currentDatabase = "Inventory";
-        myConn.close();
-        myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/"+this.currentDatabase, username, password);
-        
-        String sql = "CREATE VIEW ";
-        sql += nameOfView;
-        sql += " AS SELECT ";
-        for(int i = 0; i < actualColName.size() - 1; i++){
-            
-                sql += actualColName.get(i);
-                sql += " AS ";
-                
-                sql += "'" +viewColName.get(i) + "',";
-                
-          
-            
+    public boolean addNewEmployee(String fName, String lName, String userName, String password, String role) throws SQLException{
+       int whichKey = AccessControl.getRoleKey(role.toUpperCase());
+       
+        if(AccessControl.validRole(role)){
+            String sql = "INSERT INTO userInfo(fName,lName,userName,userPass,role_id) VALUES (?,?,?,?,?)";
+            PreparedStatement preparedStatement = myConn.prepareStatement(sql);
+            preparedStatement.setString(1, fName);
+            preparedStatement.setString(2, lName);
+            preparedStatement.setString(3, AES.encrypt(userName,whichKey));
+            preparedStatement.setString(4, AES.encrypt(password, whichKey));
+            preparedStatement.setInt(5,AccessControl.returnRole(role));
+            System.out.println(preparedStatement);
+            preparedStatement.executeUpdate();
+        return true;
+        }else{
+            System.out.println("INVALID ROLE");
+            return false;
         }
-        String subSql = sql.substring(0, sql.length() -1);
+  
         
-        subSql += " FROM ";
-        subSql += table;
-        System.out.println(subSql);
-               /*
-        PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-        myRs = preparedStatement.executeQuery();
-        while(myRs.next()){
-            System.out.println(myRs.getString("plane_name"));
-        }
-        return "implement createView later";
+        
     }
     
-    public String getTableAll() throws SQLException{
-        /*
-        this.currentDatabase = "Inventory";
-        myConn.close();
-        myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/"+this.currentDatabase, username, password);
-        */
-        
-    }
+   
     
     public boolean isLoggedIn() {
         return this.loggedIn;
@@ -136,6 +122,27 @@ public class Custodian extends SecurityManager implements UserInterface {
         this.loggedIn = false;
         return this.loggedIn;
     }
+    
+    //retrieve the keys from the login database
+    private void getKeys(String username, String password){
+        try{
+        Connection keyConn = DriverManager.getConnection(AccessControl.loginDatabase,username,password);
+        String sql = "SELECT key_val FROM roles";
+        PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+        ResultSet keyRs = preparedStatement.executeQuery();
+        while(keyRs.next()){
+            int key = keyRs.getInt("key_val");
+            this.keys.add(key);
+        }
+        
+        
+        }catch(SQLException e){
+        
+        }
+    }
+    
+    
+    
     //prevents access from by reflection
     @Override
     public void checkPackageAccess(String pkg){
@@ -143,6 +150,8 @@ public class Custodian extends SecurityManager implements UserInterface {
             throw new SecurityException("You can't do that");
     }
     }
+    
+    
 }
 
 

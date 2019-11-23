@@ -2,43 +2,40 @@
 import java.sql.*;
 import java.util.ArrayList;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/**
- *
- * @author ErikD
- */
-public class Warehouse implements UserInterface {
-    private String role;
+public class Warehouse {
+    private String role = "WAREHOUSE";
+    private int key;
     private boolean loggedIn;
     private Connection myConn = null;
     private Statement myStmt = null;
     private ResultSet myRs = null;
-    private String empUsername;
-    private String empPassword;
+   
+   
     private static String dbEmp;
     private static String dbPass;
     
     public Warehouse(String username, String password){
+        
         this.dbEmp = "sampleuser";
         this.dbPass = "CodeHaze1";
+        assignKey();
+        login(username,password);
         
-        this.empUsername = username;
-        this.empPassword = password;
+     
 }
     
     
-    public void login() throws SQLException {
+    
+    private void login(String username, String password) {
        try{
+           String encUsername = AES.encrypt(username,this.key);
+           String encPassword = AES.encrypt(password, this.key);
            myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/Accounts", dbEmp, dbPass);
            String sql = "SELECT userName, userPass FROM userInfo WHERE userName = ? AND userPass = ?";
            PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-           preparedStatement.setString(1, this.empUsername);
-           preparedStatement.setString(2, this.empPassword);
+           preparedStatement.setString(1, encUsername);
+           preparedStatement.setString(2, encPassword);
            myRs = preparedStatement.executeQuery();
            
            int count = 0;
@@ -47,8 +44,7 @@ public class Warehouse implements UserInterface {
                count++;
            }
            if(count == 1){
-                      this.loggedIn = true;
-            
+               this.loggedIn = true;
                System.out.println("Successfully verified");
            }else{
                this.loggedIn = false;
@@ -103,9 +99,32 @@ public class Warehouse implements UserInterface {
         }
     }
 
-
-
- 
+    public void listViews(){
+    String sql = "SHOW FULL TABLES IN Inventory WHERE TABLE_TYPE LIKE 'VIEW'";
+    }
+    
+    private void assignKey(){
+        
+        try{
+        Connection keyConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/LoginSchema", dbEmp, dbPass);
+        String sql = "SELECT key_val FROM roles WHERE role_name = ?";
+        PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+        preparedStatement.setString(1,this.role);
+        System.out.println(preparedStatement);
+        
+        ResultSet keyRs = preparedStatement.executeQuery();
+        if(keyRs.next()){
+            this.key = keyRs.getInt("key_val");
+        }
+        keyConn.close();
+        }catch(SQLException e){
+            e.printStackTrace();
+            System.out.println("FATAL ERROR");
+            
+    }
+        
+       
+    }
 
 
 
