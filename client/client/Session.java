@@ -1,10 +1,9 @@
-
+package client;
 
 import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class Session extends JFrame implements ListSelectionListener {
+public class Session extends JFrame implements ListSelectionListener, ActionListener {
 
     /**
      *
@@ -23,10 +22,10 @@ public class Session extends JFrame implements ListSelectionListener {
     private DefaultListModel chatRoomList;
     private JLabel lbUserInfo;
     private JButton btnJoin;
-    private JButton btnCreate;
     private JButton btnAccess;
     private JButton btnLogOut;
     private String username;
+    private final int CHATROOM_PORT = 8081;
 
     
     public Session(String username) {
@@ -34,13 +33,13 @@ public class Session extends JFrame implements ListSelectionListener {
         JPanel userInfoPn = new JPanel();
         lbUserInfo = new JLabel("Logged in as " + username);
         btnLogOut = new JButton("Sign Out");
-        btnLogOut.addActionListener(new logOutListener());
+        btnLogOut.addActionListener(this);
         userInfoPn.setLayout(new BorderLayout());
         userInfoPn.add(lbUserInfo, BorderLayout.LINE_START);
         userInfoPn.add(btnLogOut, BorderLayout.LINE_END);
         chatRoomList = new DefaultListModel();
-        for (int i = 1; i < 4; i++) {
-            chatRoomList.addElement("username" + i + "'s chatroom");
+        for (int i = 8081; i < 8091; i++) {
+            chatRoomList.addElement("Chatroom port: " + i);
         }
         list = new JList(chatRoomList);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -51,14 +50,11 @@ public class Session extends JFrame implements ListSelectionListener {
 
         JPanel btnPn = new JPanel();
         btnJoin = new JButton("Join selected Chatroom");
-        btnJoin.addActionListener(new joinListener());
-        btnCreate = new JButton("Create Chatroom");
-        btnCreate.addActionListener(new createListener());
+        btnJoin.addActionListener(this);
         btnAccess = new JButton("Access File System");
-        btnAccess.addActionListener(new accessListener());
+        btnAccess.addActionListener(this);
         btnPn.setLayout(new BorderLayout());
         btnPn.add(btnJoin, BorderLayout.WEST);
-        btnPn.add(btnCreate, BorderLayout.CENTER);
         btnPn.add(btnAccess, BorderLayout.EAST);
 
         setLayout(new BorderLayout());
@@ -68,55 +64,6 @@ public class Session extends JFrame implements ListSelectionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(700, 700);
         setVisible(true);
-    }
-
-    /**
-     * Join an existing chat room.
-     */
-    private class joinListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            int index = list.getSelectedIndex();
-            int size = chatRoomList.getSize();
- 
-            if (size == 0) { // There is no chatroom, disable the join button.
-                btnJoin.setEnabled(false);
- 
-            } else { //Select an index.
-                // TODO 
-                list.setSelectedIndex(index);
-                list.ensureIndexIsVisible(index);
-            }
-        }
-    }
-
-    /**
-     * Create a new chat room.
-     */
-    private class createListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            // TODO
-            new ChatRoom(0, username);
-        }
-    }
-
-    /**
-     * Access the file system
-     */
-    private class accessListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            // TODO
-            new ABCFileSystem();
-        }
-    }
-
-    /**
-     * Terminate the session
-     */
-    private class logOutListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            // TODO
-            System.exit(0);
-        }
     }
 
     public static void main(String[] args) {
@@ -135,6 +82,25 @@ public class Session extends JFrame implements ListSelectionListener {
             //Selection, enable the fire button.
                 btnJoin.setEnabled(true);
             }
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnJoin){
+            int index = list.getSelectedIndex();
+            int size = chatRoomList.getSize();
+            if (size == 0) { // There is no chatroom, disable the join button.
+                btnJoin.setEnabled(false);
+            } else { //Select an index.
+                list.setSelectedIndex(index);
+                list.ensureIndexIsVisible(index);
+                new client.ChatRoom(index + CHATROOM_PORT, username);
+            }
+        } else if (e.getSource() == btnAccess) {
+            new ABCFileSystem();
+        } else if (e.getSource() == btnLogOut) {
+            System.exit(0);
         }
     }
 }

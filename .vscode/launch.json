@@ -2,6 +2,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ChatRoom",
+            "request": "launch",
+            "mainClass": "client.ChatRoom",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Session",
+            "request": "launch",
+            "mainClass": "client.Session",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Login",
+            "request": "launch",
+            "mainClass": "Login",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Chatroom",
+            "request": "launch",
+            "mainClass": "Chatroom",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - FileBrowser",
             "request": "launch",
             "mainClass": "FileBrowser",

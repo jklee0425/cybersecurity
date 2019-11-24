@@ -13,9 +13,9 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import client.ChatRoom;
+import client.*;
 
-public class Login extends JFrame {
+public class Login extends JFrame implements ActionListener{
     /**
      *
      */
@@ -46,7 +46,7 @@ public class Login extends JFrame {
 
         JPanel btnPanel = new JPanel();
         btnLogin = new JButton("Log in");
-        btnLogin.addActionListener(new loginListener());
+        btnLogin.addActionListener(this);
 
         btnPanel.add(btnLogin);
 
@@ -60,11 +60,10 @@ public class Login extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
-    private class loginListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            if(isAllowed(Helper.getUsername(tfUsername))){
-                new ChatRoom(8081, Helper.getUsername(tfUsername));
-            }
+    public void actionPerformed(ActionEvent e) {
+        if(isAllowed(Helper.getUsername(tfUsername))){
+            dispose();
+            new client.Session(Helper.getUsername(tfUsername));
         }
     }
     /**
@@ -77,8 +76,9 @@ public class Login extends JFrame {
         // Retrieve allowed time for the user in the system.
         String[] accessibleTime = { "15:30", "14:40" }; // example
         LocalTime now = LocalTime.now();
-        return now.isAfter(LocalTime.parse(accessibleTime[0])) && 
-            now.isBefore(LocalTime.parse(accessibleTime[1]));
+        // return now.isAfter(LocalTime.parse(accessibleTime[0])) && 
+        //     now.isBefore(LocalTime.parse(accessibleTime[1]));
+        return true;
     }
     /**
      * Check if the pw matches the username

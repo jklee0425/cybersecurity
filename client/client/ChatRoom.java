@@ -1,16 +1,21 @@
+package client;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -18,13 +23,10 @@ import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
-public class ChatRoom extends JFrame{
-	//@summary Creates a client for a chatroom
-	
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+import clientServer.AES.*;
+public class ChatRoom extends JFrame {
+	// @summary Creates a client for a chatroom
+
 	private JTextArea msgArea;
 	private JTextField msgField;
 	private JMenuBar menuBar;
@@ -35,21 +37,21 @@ public class ChatRoom extends JFrame{
 	private int prime, generator, randNum, id, key;
 	private String host;
 	private boolean runnable = true;
-	
+
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
 		final int FRAME_HEIGHT = 200;
-		
-	JPanel panel = new JPanel();
+
+		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
 
 		msgField = new JTextField("");
 		msgField.addActionListener(new msgListener());
-		
+
 		panel.setLayout(new BorderLayout());
 		panel.add(label, BorderLayout.WEST);
 		panel.add(msgField, BorderLayout.CENTER);
-		
+
 		msgArea = new JTextArea();
 		msgArea.setEditable(false);
 		setLayout(new BorderLayout());
@@ -62,8 +64,8 @@ public class ChatRoom extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
-	
-	public void diffieHellman(){
+
+	public void diffieHellman() {
 		msgArea.append("Sending key\n");
 		try {
 			toServer.writeInt((int) (Math.pow(generator, randNum) % prime));
@@ -76,31 +78,30 @@ public class ChatRoom extends JFrame{
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
 		menuBar.add(menuExit);
-	    menuExit.addMenuListener(new MenuListener() {
-	    	
-	    	@Override
-	    	public void menuSelected(MenuEvent e) {
-					try {
-						runnable = false;
-						String send = id + " has left";
-						msgArea.append("Exiting");
-						toServer.writeInt(id);
-						toServer.writeUTF(AES.encrypt(String.valueOf(send.hashCode()), key));
-						toServer.writeUTF(AES.encrypt(send,key));
-						toServer.flush();
-						dispose();
-						socket.close();
-						toServer.close();
-						fromServer.close();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-		      }
+		menuExit.addMenuListener(new MenuListener() {
+			@Override
+			public void menuSelected(MenuEvent e) {
+				try {
+					runnable = false;
+					String send = id + " has left";
+					msgArea.append("Exiting");
+					toServer.writeInt(id);
+					toServer.writeUTF(AES.encrypt(String.valueOf(send.hashCode()), key));
+					toServer.writeUTF(AES.encrypt(send, key));
+					toServer.flush();
+					dispose();
+					socket.close();
+					toServer.close();
+					fromServer.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 
 			@Override
 			public void menuDeselected(MenuEvent e) {
@@ -110,9 +111,10 @@ public class ChatRoom extends JFrame{
 			public void menuCanceled(MenuEvent e) {
 			}
 
-		    });
+		});
 		setJMenuBar(menuBar);
 	}
+
 	public ChatRoom(int port, String host) {
 		buildGUI();
 		try {
@@ -122,11 +124,10 @@ public class ChatRoom extends JFrame{
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			this.host = host;
-	      	this.randNum = gen.nextInt(9) + 1;
+			this.randNum = gen.nextInt(9) + 1;
 			this.prime = 13;
-			this.generator = 6; 
-		}
-		catch(Exception e) {
+			this.generator = 6;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		msgArea.append("There is a 14 character limit for messages\n");
@@ -135,28 +136,27 @@ public class ChatRoom extends JFrame{
 			@Override
 			public void run() {
 				String msg;
-				while(runnable == true) {
+				while (runnable == true) {
 					try {
 						msg = fromServer.readUTF();
 						msgArea.append(AES.decrypt(msg, key).trim() + '\n');
-					} catch(IOException e) {
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
-				
+
 			}
 		});
 		read.start();
 	}
-	
 
-	private class msgListener implements ActionListener{
+	private class msgListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			try {
 				toServer.writeInt(id);
 				String msg = id + ">" + msgField.getText().trim();
 				toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
-				toServer.writeUTF(AES.encrypt(msg,key));
+				toServer.writeUTF(AES.encrypt(msg, key));
 				toServer.flush();
 				msgField.setText("");
 			} catch (IOException e1) {
@@ -164,8 +164,8 @@ public class ChatRoom extends JFrame{
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) {
-		new Client(8081, "User");
+		new ChatRoom(8081, "User");
 	}
 }

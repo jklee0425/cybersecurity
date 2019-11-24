@@ -1,13 +1,10 @@
-
+package client;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-// import java.nio.file.Files;
-// import java.nio.file.Path;
-// import java.nio.file.Paths;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -75,7 +72,10 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             // TODO
             File file = fc.getSelectedFile();
             Path path = Paths.get(System.getProperty("user.dir") + "\\");
-            Files.copy(file, path.resolve(file.getName()));
+            // Files.copy(file, path.resolve(file.getName()));
         }
+    }
+    public void log(){
+        
     }
 }
