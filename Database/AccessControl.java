@@ -17,6 +17,7 @@ public class AccessControl {
     private static boolean[] readWrite = new boolean[2];
     public static String loginDatabase = "jdbc:mysql://35.247.4.229:3306/LoginSchema";
     public static String accountDatabase = "jdbc:mysql://35.247.4.229:3306/Accounts";
+    public static String inventoryDatabase = "jdbc:mysql://35.247.4.229:3306/Inventory";
     /*
     public static boolean writePrivelege(String userRole){
         //only TOP_ADMIN role can write to the server
@@ -57,18 +58,21 @@ public class AccessControl {
         return false;
     }
     
-    public static int returnRole(String rolename){
-        int roleNum = 0;
-        String formatted = rolename.toUpperCase();
-        switch(rolename){
-            case "WAREHOUSE":return 100;
-            case "SALESPERSON":return 101;
-            default:return 1;
+    public static int returnRoleID(String rolename){
+        
+       
+      
+        if(rolename.equals("WAREHOUSE")){
+            
+            return 101;
+        } else if(rolename.equals("SALESPERSON")){
+            return 102;
         }
+        return -1;
     }
     
     public static int getRoleKey(String rolename){
-        if(rolename.equals("WAREHOUES")){
+        if(rolename.equals("WAREHOUSE")){
             return 101;
         }else if(rolename.equals("SALESPERSON")){
             return 302;
@@ -83,5 +87,17 @@ public class AccessControl {
             }
         }
         return false;
+    }
+    
+    public static String getViewName(String input){
+        System.out.println(input);
+        if(input.equals("Germany")){
+            return "Germany_View";
+        }else if(input.equals("New York")){
+            return "New_York_View";
+        } else if(input.equals("Vancouver")){
+            return "Vancouver_View";
+        }
+        return "ERORR";
     }
 }

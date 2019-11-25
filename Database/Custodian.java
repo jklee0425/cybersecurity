@@ -37,18 +37,36 @@ public class Custodian extends SecurityManager {
     }
     
     //since a custodian has access to creation of users, he can create users
-    
-    public boolean createUser(String newUserName, String newUserPassword, int role) throws SQLException{
-        //set up the user
-        String sql = "CREATE USER ? IDENTIFIED BY ?";
-        PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-        preparedStatement.setString(1,newUserName);
-        preparedStatement.setString(2,newUserPassword);
-        //execute the query
-        //set up the grants
+    public boolean createUser(String firstName, String lastName, String newUserName, String newUserPassword, String role) throws SQLException{
+        //check if the user exists
+        String sqlCheck = "SELECT fName, lName FROM userInfo WHERE fName = ? AND lName = ?";
+        PreparedStatement prepStateCheck = myConn.prepareStatement(sqlCheck);
+        prepStateCheck.setString(1,firstName);
+        prepStateCheck.setString(2, lastName);
+        myRs = prepStateCheck.executeQuery();
+        boolean dupeUser = false;
+        int count = 0;
+        while(myRs.next()){
+            count++;
+        }
+        if(count > 0){
+            System.out.println("dupe user detected");
+            return false;
+        }
         
-        System.out.println(preparedStatement);
-        return true;
+        //create user
+          String sql = "INSERT INTO userInfo(fName,lName,userName,userPass,role_id) VALUES (?,?,?,?,?)";
+          PreparedStatement prepareStatement = myConn.prepareStatement(sql);
+          prepareStatement.setString(1,firstName);
+          prepareStatement.setString(2, lastName);
+          prepareStatement.setString(3,AES.encrypt(newUserName, AccessControl.getRoleKey(role.toUpperCase())));
+          prepareStatement.setString(4,AES.encrypt(newUserPassword,AccessControl.getRoleKey(role.toUpperCase())));
+          prepareStatement.setInt(5,AccessControl.returnRoleID(role));
+          //System.out.println(AccessControl.getRoleKey(role) + " ROLE KEY");
+          prepareStatement.executeUpdate();
+          
+          
+          return true;
     }
     
     public String showUsers() throws SQLException{
@@ -88,28 +106,7 @@ public class Custodian extends SecurityManager {
         return "implement grantUser later";
     }
     
-    public boolean addNewEmployee(String fName, String lName, String userName, String password, String role) throws SQLException{
-       int whichKey = AccessControl.getRoleKey(role.toUpperCase());
-       
-        if(AccessControl.validRole(role)){
-            String sql = "INSERT INTO userInfo(fName,lName,userName,userPass,role_id) VALUES (?,?,?,?,?)";
-            PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-            preparedStatement.setString(1, fName);
-            preparedStatement.setString(2, lName);
-            preparedStatement.setString(3, AES.encrypt(userName,whichKey));
-            preparedStatement.setString(4, AES.encrypt(password, whichKey));
-            preparedStatement.setInt(5,AccessControl.returnRole(role));
-            System.out.println(preparedStatement);
-            preparedStatement.executeUpdate();
-        return true;
-        }else{
-            System.out.println("INVALID ROLE");
-            return false;
-        }
-  
-        
-        
-    }
+
     
    
     
