@@ -6,16 +6,12 @@ import javax.swing.JOptionPane;
 public class Main {
     
  public static void main(String[] args) throws SQLException{
-     //Custodian testCust = new Custodian("sampleuser","CodeHaze1");
-     //testCust.createUser("Erik","Dengler","warehouseOne","warehouseP","WAREHOUSE");
-     Warehouse test = new Warehouse("warehouseOne","warehouseP");
      Scanner input = new Scanner(System.in);
      String command = "empty";
      do{
          System.out.println("Please input mode. Warehouse, Custodian, or Salesperson");
          command = input.next();
          String formattedCom = command.toUpperCase();
-         
          //Warehouse commands
          if(formattedCom.equals("WAREHOUSE")){
              //Get user info to input
@@ -43,8 +39,7 @@ public class Main {
                  }else if(command.equals("viewdata")){
                      System.out.println("Which view would you like to see? Enter view name");
                      currentUser.listViews();
-                     command = input.next();
-                     String viewName = AccessControl.getViewName(command);
+                     String viewName = input.next();
                      currentUser.viewData(viewName);
                  }else{
                      System.out.println("Unknown command entered");
@@ -60,9 +55,69 @@ public class Main {
              String password = input.next();
              Custodian currentUser = new Custodian(username, password);
              while(currentUser.isLoggedIn()){
+                    System.out.println("Please enter a command");
+                    command = input.next();
+                    if(command.equals("create")){
+                        System.out.println("Enter first name");
+                        String fName = input.next();
+                        System.out.println("Enter last name");
+                        String lName = input.next();
+                        System.out.println("Enter user name");
+                        String userName = input.next();
+                        System.out.println("Enter password");
+                        String userPass = input.next();
+                        System.out.println("Enter role");
+                        String roleStr = input.next();
+                        if(AccessControl.validRole(roleStr)){
+                            currentUser.createUser(fName, lName, userName, userPass, roleStr);
+                        }else{
+                            System.out.println("INVALID ROLE");
+                        }
+                        
                     
+                    }else if(command.equals("listSales")){
+                        currentUser.listSales("SALESPERSON");
+                    }else if(command.equals("listWarehouse")){
+                        currentUser.listSales("WAREHOUSE");
+                    }else if(command.equals("logout")){
+                        currentUser.logOff();
+                    }else{
+                        System.out.println("Invalid Commands");
+                    }
              }
          
+         }else if(formattedCom.equals("SALESPERSON")){
+             System.out.println("Username");
+             String username = input.next();
+             System.out.println("Password");
+             String password= input.next();
+             Salesperson currentUser = new Salesperson(username,password);
+             while(currentUser.isLoggedIn()){
+                 System.out.println("Please enter a command");
+                 command = input.next();
+                 
+                 if(command.equals("logout")){
+                     currentUser.logOff();
+                 }else if(command.equals("viewdata")){
+                     System.out.println("Enter view data");
+                     currentUser.listViews();
+                     String viewName = input.next();
+                     currentUser.viewData(viewName);
+                 }else if(command.equals("sell")){
+                     
+                     System.out.println("Enter view name");
+                     String viewName = input.next();
+                     System.out.println("Enter Plane name");
+                     String planeName = input.next();
+                     System.out.println("Enter Brand name");
+                     String brand = input.next();
+                     System.out.println("Enter how many to sell");
+                     int stock = input.nextInt();
+                     currentUser.sell(viewName, planeName, brand, stock);
+                             
+                             
+                 }
+             }
          }
      }while(!command.equals("exit"));
    

@@ -13,11 +13,11 @@ public class Salesperson {
     private static String dbPass;
     
     public Salesperson(String username, String password){
-        this.dbEmp = "sampleuser";
-        this.dbPass = "CodeHaze1";
+        this.dbEmp = "login_agent";
+        this.dbPass = "agent_login@";
         assignKey();
         login(username,password);
-        displayTable();
+        
     }
     
     
@@ -34,16 +34,17 @@ public class Salesperson {
            
            int count = 0;
            while(accRs.next()){
-               System.out.println(accRs.getString("userName"));
                count++;
            }
            if(count == 1){
                accountConn.close();
                this.loggedIn = true;
+               myConn = DriverManager.getConnection(AccessControl.inventoryDatabase,dbEmp,dbPass);
                System.out.println("Successfully verified");
            }else{
                this.loggedIn = false;
                System.out.println("Verify failed, please insert a valid password");
+               System.exit(0);
            }
            
            
@@ -55,59 +56,81 @@ public class Salesperson {
 
     }
      
-     private void displayTable(){
+public void listViews(){
+    String sql = "SHOW FULL TABLES IN Inventory WHERE TABLE_TYPE LIKE 'VIEW'";
+    
+    try{
+        PreparedStatement preparedStatement = myConn.prepareStatement(sql); 
+        myRs = preparedStatement.executeQuery();
+        System.out.println("Available Views");
+        while(myRs.next()){
+            System.out.println("        " + myRs.getString("Tables_in_Inventory"));
+        }
+    }catch(SQLException e){
+        System.out.println("Views are unavailable");
+    }
+ }
+
+
+
+
+    public void viewData(String input){
+        System.out.println(input);
+    try{
+        String sql = "SELECT * FROM "+ input;
+      
+        Statement viewStmt = myConn.createStatement();
+        myRs = viewStmt.executeQuery(sql);
+        System.out.println("Name:Brand:Year:Stock");
+        while(myRs.next()){
+            String name = myRs.getString("Plane Name");
+            String brand = myRs.getString("Brand");
+            int year = myRs.getInt("Year");
+            int stock = myRs.getInt("Stock");
+            System.out.println(name + ":" + brand +":"+year+":"+stock);
+        }
+    }catch(SQLException e){
+        System.out.println("SELECTING FROM VIEW ERROR");
+        e.printStackTrace();
+        System.exit(0);
+    }
+    
+    
+    }
+
+
+
+
+
+
+
+
+    
+     public void sell(String viewName,String name, String brand, int number){
          try{
-            myConn = DriverManager.getConnection("jdbc:mysql://35.247.4.229:3306/Inventory", this.dbEmp, this.dbPass);
-            String sql = "SELECT * FROM sales_table";
-            PreparedStatement preppedStatement = myConn.prepareStatement(sql);
-            myRs = preppedStatement.executeQuery();
-            System.out.println("Name : Brand : Price : Stock");
+            
+            
+            String selectSql = "SELECT Stock FROM "+viewName+" WHERE Brand = ? AND 'Plane Name' = ?";
+            PreparedStatement preparedStatement = myConn.prepareStatement(selectSql);
+            preparedStatement.setString(1,brand);
+            preparedStatement.setString(2,name);
+            myRs = preparedStatement.executeQuery();
             while(myRs.next()){
-                System.out.println();
-                System.out.print(myRs.getString("Name") + " : ");
-                System.out.print(myRs.getString("Brand")+ " : ");
-                System.out.print(myRs.getString("Price")+" : ");
-                System.out.print(myRs.getString("Stock")+ " : ");
-                System.out.println();
-                
+                int stock = myRs.getInt("Stock");
+                System.out.println("Stock" + stock);
             }
+            String sql = "UPDATE "+viewName+" SET STOCK = ? WHERE Brand = ? AND 'Plane Name' = ?";
+            //preparedStatement.setInt(1, number);
+            //preparedStatement.setString(2,brand);
+            //preparedStatement.setString(3,name);
+           
+            System.out.println(preparedStatement);
          }catch(SQLException e){
+             System.out.println("Error in sell");
              e.printStackTrace();
-             System.out.println("Database currently unavailable");
+             System.exit(0);
          }
          
-     }
-    
-     public void sell(String name, String brand, int number){
-         String sql = "SELECT Name, Brand,Stock from sales_table WHERE Name=? AND Brand=?";
-         try{
-          myStmt = myConn.prepareStatement(sql);
-          myStmt.setString(1,name);
-          myStmt.setString(2,brand);
-          myRs = myStmt.executeQuery();
-          int count = -1;
-          System.out.println(myStmt);
-          while(myRs.next()){
-              count = Integer.parseInt(myRs.getString("Stock"));
-          }
-          if(count < number){
-              System.out.println("You cant sell that much");
-          }else{
-              sql = "UPDATE sales_table SET Stock = ? WHERE Name=? AND Brand=?";
-              myStmt = myConn.prepareStatement(sql);
-              String strCount = Integer.toString(count - number);
-              myStmt.setString(1,strCount);
-              myStmt.setString(2,name);
-              myStmt.setString(3, brand);
-              
-              myStmt.executeUpdate();
-              displayTable();
-          }
-          
-         }catch(SQLException e){
-         e.printStackTrace();
-         }
-        
      }
      
   
@@ -132,5 +155,13 @@ public class Salesperson {
             
     }  
     }
-    
+        
+    public boolean isLoggedIn() {
+        return this.loggedIn;
+    }
+    public boolean logOff() throws SQLException {
+        myConn.close();
+        this.loggedIn = false;
+        return this.loggedIn;
+    }
 }

@@ -31,9 +31,9 @@ public class Warehouse {
        try{
            String encUsername = AES.encrypt(username,this.key);
            String encPassword = AES.encrypt(password, this.key);
-           Connection accountAgent = DriverManager.getConnection(AccessControl.accountDatabase,dbEmp,dbPass);
+           myConn = DriverManager.getConnection(AccessControl.accountDatabase,dbEmp,dbPass);
            String accSql = "SELECT userName,userPass FROM userInfo WHERE userName = ? AND userPass = ?";
-           PreparedStatement prepState = accountAgent.prepareStatement(accSql);
+           PreparedStatement prepState = myConn.prepareStatement(accSql);
            prepState.setString(1,encUsername);
            prepState.setString(2,encPassword);
            ResultSet accRs = prepState.executeQuery();
@@ -42,33 +42,12 @@ public class Warehouse {
                count++;
            }
            if(count == 1){
-               System.out.println("VERIFIED");
-           }
-           /*
-           myConn = DriverManager.getConnection(AccessControl.accountDatabase, dbEmp, dbPass);
-           String sql = "SELECT userName, userPass FROM userInfo WHERE userName = ? AND userPass = ?";
-           PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-           preparedStatement.setString(1, encUsername);
-           preparedStatement.setString(2, encPassword);
-         
-          
-           myRs = preparedStatement.executeQuery();
-           
-           int count = 0;
-           while(myRs.next()){
-              
-               count++;
-           }
-           if(count == 1){
                this.loggedIn = true;
-               System.out.println("Successfully verified");
-               myConn = DriverManager.getConnection(AccessControl.inventoryDatabase,dbEmp, dbPass);
-           }else{
-               this.loggedIn = false;
-               System.out.println("Verify failed, please insert a valid password");
+               myConn = DriverManager.getConnection(AccessControl.inventoryDatabase,dbEmp,dbPass);
+               System.out.println("VERIFIED");
+               
            }
-           
-         */  
+
        }catch(SQLException e){
            this.loggedIn = false;
            e.printStackTrace();
@@ -109,8 +88,10 @@ public class Warehouse {
   }
     
     public void viewData(String input){
+        System.out.println(input);
     try{
-        String sql = "SELECT * FROM "+AccessControl.getViewName(input) ;
+        String sql = "SELECT * FROM "+ input;
+      
         myStmt = myConn.createStatement();
         myRs = myStmt.executeQuery(sql);
         System.out.println("Name:Brand:Year:Stock");

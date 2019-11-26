@@ -30,6 +30,7 @@ public class Custodian extends SecurityManager {
         }catch(SQLException e){
             this.loggedIn = false;
             System.out.println("Failed");
+            System.exit(0);
         
         }
        loggedIn = true;
@@ -39,12 +40,13 @@ public class Custodian extends SecurityManager {
     //since a custodian has access to creation of users, he can create users
     public boolean createUser(String firstName, String lastName, String newUserName, String newUserPassword, String role) throws SQLException{
         //check if the user exists
-        String sqlCheck = "SELECT fName, lName FROM userInfo WHERE fName = ? AND lName = ?";
+        String roleUser = role.toUpperCase();
+        String sqlCheck = "SELECT userName FROM userInfo WHERE userName = ?";
         PreparedStatement prepStateCheck = myConn.prepareStatement(sqlCheck);
-        prepStateCheck.setString(1,firstName);
-        prepStateCheck.setString(2, lastName);
+        prepStateCheck.setString(1,AES.encrypt(newUserName,AccessControl.getRoleKey(roleUser)));
+        
         myRs = prepStateCheck.executeQuery();
-        boolean dupeUser = false;
+        
         int count = 0;
         while(myRs.next()){
             count++;
@@ -61,51 +63,30 @@ public class Custodian extends SecurityManager {
           prepareStatement.setString(2, lastName);
           prepareStatement.setString(3,AES.encrypt(newUserName, AccessControl.getRoleKey(role.toUpperCase())));
           prepareStatement.setString(4,AES.encrypt(newUserPassword,AccessControl.getRoleKey(role.toUpperCase())));
-          prepareStatement.setInt(5,AccessControl.returnRoleID(role));
-          //System.out.println(AccessControl.getRoleKey(role) + " ROLE KEY");
+          prepareStatement.setInt(5,AccessControl.returnRoleID(roleUser));
+          System.out.println(AccessControl.returnRoleID(roleUser) + " ROLE KEY");
           prepareStatement.executeUpdate();
           
           
           return true;
     }
     
-    public String showUsers() throws SQLException{
-        String sql = "SELECT * from mysql.user";
-        PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-        myRs = preparedStatement.executeQuery();
-        int rowCount = 1;
-        System.out.println("List of Users");
-        //read the results of myRs set
-        while(myRs.next()){
-            
-            System.out.println("     " + rowCount +" : "+ myRs.getString("user"));
-            rowCount++;
+    
+    public void listSales(String role){
+        String sql = "SELECT * FROM userInfo WHERE role_id = ?";
+        try{
+            PreparedStatement prepareStatement = myConn.prepareStatement(sql);
+            prepareStatement.setInt(1, AccessControl.returnRoleID(role));
+            myRs = prepareStatement.executeQuery();
+            while(myRs.next()){
+              System.out.println(myRs.getString("fName") + " :  " + myRs.getString("lName")+ " : " + myRs.getString("userName") + " : " + myRs.getString("userPass")+":" + myRs.getInt("role_id") );
+              
+            }
+        }catch(SQLException e){
+            System.out.println("Error geting sales");
         }
-        return "format string later";
+        
     }
-    //since a custodian has access to users, he can list the grants
-
-    public String showGrants(String username)throws SQLException{
-       String sql = "SHOW GRANTS FOR ?";  
-       PreparedStatement preparedStatement = myConn.prepareStatement(sql);
-       preparedStatement.setString(1,username);
-       myRs = preparedStatement.executeQuery();
-       ResultSetMetaData rsmd = myRs.getMetaData();
-       String grantUsername = AccessControl.getGrantsUsername(rsmd.getColumnName(1));
-       while(myRs.next()){
-           
-           System.out.println(myRs.getString("Grants for "+ grantUsername));
-       }
-        return "Implement showGrants later";
-    }
-    //will take a predefined list of permissions from an outside jar file
-    
-    public String grantUser(String username, int role) throws SQLException{
-        //set permissions to user in airplane database
-        String sql = "GRANT SELECT ON ";
-        return "implement grantUser later";
-    }
-    
 
     
    
@@ -148,7 +129,9 @@ public class Custodian extends SecurityManager {
     }
     }
     
+    private void logEvent(String functionName){
     
+    }
 }
 
 

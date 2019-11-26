@@ -64,9 +64,9 @@ public class AccessControl {
       
         if(rolename.equals("WAREHOUSE")){
             
-            return 101;
+            return 100;
         } else if(rolename.equals("SALESPERSON")){
-            return 102;
+            return 101;
         }
         return -1;
     }
@@ -88,16 +88,18 @@ public class AccessControl {
         }
         return false;
     }
-    
+    /*
     public static String getViewName(String input){
-        System.out.println(input);
-        if(input.equals("Germany")){
+        String format = input.toUpperCase();
+        
+        if(format.equals("GERMANY")){
             return "Germany_View";
-        }else if(input.equals("New York")){
+        }else if(format.equals("NEW YORK")){
             return "New_York_View";
-        } else if(input.equals("Vancouver")){
+        } else if(format.equals("VANCOUVER")){
             return "Vancouver_View";
         }
         return "ERORR";
     }
+*/
 }
