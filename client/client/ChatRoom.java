@@ -88,16 +88,14 @@ public class ChatRoom extends JFrame {
 			public void menuSelected(MenuEvent e) {
 				try {
 					runnable = false;
-					String send = id + " has left";
 					msgArea.append("Exiting");
-					toServer.writeInt(id);
-					toServer.writeUTF(AES.encrypt(String.valueOf(send.hashCode()), key));
-					toServer.writeUTF(AES.encrypt(send, key));
+					toServer.writeUTF(AES.encrypt("ping", key));
 					toServer.flush();
+					sendMsg(id + " has left");
 					dispose();
-					socket.close();
-					toServer.close();
+					socket.close();						toServer.close();
 					fromServer.close();
+					System.exit(0);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -138,8 +136,7 @@ public class ChatRoom extends JFrame {
 				String msg;
 				while (runnable == true) {
 					try {
-						msg = fromServer.readUTF();
-						msgArea.append(AES.decrypt(msg, key).trim() + '\n');
+						receiveMsg()
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -149,15 +146,44 @@ public class ChatRoom extends JFrame {
 		});
 		read.start();
 	}
+	
+	private void receiveMsg() throws IOException {
+		String tmp = "", msg = "";
+		do {
+			tmp = AES.decrypt(fromServer.readUTF(), key).trim();
+			if(!tmp.equals(".")) {
+				msg += tmp;
+			}
+		}while(!tmp.equals("."));
+		msgArea.append(msg.replaceAll("`", " ") + '\n');
+	}
+	
+	private void sendMsg(String msg) {
+		String tmp;
+		try {
+			toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
+			for(int i = 0; i < msg.length(); i=i+4) {
+				if(i + 4 < msg.length()) {
+					tmp = msg.substring(i, i+4);
+				}
+				else {
+					tmp = msg.substring(i, msg.length());
+				}
+				toServer.writeUTF(AES.encrypt(tmp, key));
+				toServer.flush();
+			}
+			toServer.writeUTF(AES.encrypt(".", key));
+			toServer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private class msgListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			try {
-				toServer.writeInt(id);
-				String msg = id + ">" + msgField.getText().trim();
-				toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
-				toServer.writeUTF(AES.encrypt(msg, key));
-				toServer.flush();
+				toServer.writeUTF(AES.encrypt("ping", key));
+				sendMsg(host + ">" + msgField.getText().trim().replaceAll(" ", "`"));
 				msgField.setText("");
 			} catch (IOException e1) {
 				e1.printStackTrace();
