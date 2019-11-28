@@ -101,14 +101,17 @@ public class Server extends JFrame{
 		
 		private void closeClient(int client) {
 			try {
-				keys.set(client, null);
-				clients.set(client, null);
-				clients.get(client).out.writeUTF(".");//client is still waiting for input after exiting, this closes it
+				clients.get(client).out.writeUTF("exit");//client is still waiting for input after exiting, this closes it
 				clients.get(client).out.flush();
+				wait(20);
 				clients.get(client).socket.close();
 				clients.get(client).out.close();
 				clients.get(client).in.close();
+				keys.set(client, null);
+				clients.set(client, null);
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -130,9 +133,9 @@ public class Server extends JFrame{
 		
 		private void sendMsg(int client, String msg) {
 			try {
-				for(int i = 0; i < msg.length(); i = i + 4) {
-					if(i + 4 < msg.length()) {
-						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, i + 4), keys.get(client)));
+				for(int i = 0; i < msg.length(); i = i + 15) {
+					if(i + 15 < msg.length()) {
+						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, i + 15), keys.get(client)));
 					}
 					else {
 						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, msg.length()), keys.get(client)));
@@ -174,18 +177,18 @@ public class Server extends JFrame{
 					else {
 						hash = AES.decrypt(in.readUTF(), keys.get(id)).trim();
 						msg = receivedMsg(id);
-						msgArea.append(String.valueOf(msg.hashCode()) + " vs " + hash);
 						if(hash.equals(String.valueOf(msg.hashCode()))) {
 							msgArea.append(msg + '\n');
-							if(msg.trim().equals(id+" has left")) {
-								closeClient(id);
-								running = false;
-							}
 							for(int i = clients.size()-1; i >= 0; i--) {
 								if(clients.get(i) != null) {
 									msgArea.append("Sending msg to user " + i + '\n');
 									sendMsg(i, msg);
 								}
+							}
+							if(msg.endsWith("has left") == true) {
+								msgArea.append("Closing socket\n");
+								closeClient(id);
+								running = false;
 							}
 						}
 						else {
