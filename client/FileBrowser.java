@@ -4,10 +4,13 @@ import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
-public class FileBrowser extends JFrame{
+public class FileBrowser extends JFrame implements TreeSelectionListener {
 
     /**
      *
@@ -20,27 +23,30 @@ public class FileBrowser extends JFrame{
 
     private JTree tree;
 
-    public FileBrowser(){
-        File fileRoot = new File(System.getProperty("user.dir") + "\\File System");
+    public FileBrowser() {
+        File fileRoot = new File(System.getProperty("user.dir") + "\\cybersecurity\\ABCFS");
+        System.out.println((System.getProperty("user.dir") + "\\ABCFS"));
         root = new DefaultMutableTreeNode(new FileNode(fileRoot));
         treeModel = new DefaultTreeModel(root);
-        
+
         tree = new JTree(treeModel);
         tree.setShowsRootHandles(true);
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        tree.addTreeSelectionListener(this);
         JScrollPane scrollPane = new JScrollPane(tree);
-        
+
         setTitle("ABC File System");
         add(scrollPane);
         setLocationByPlatform(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(640, 480);
         setVisible(true);
-        
+
         new Thread(new CreateChildNodes(fileRoot, root)).start();
     }
 
     public static void main(String[] args) {
-        new FileBrowser ();
+        new FileBrowser();
     }
 
     private class CreateChildNodes implements Runnable {
@@ -61,7 +67,13 @@ public class FileBrowser extends JFrame{
 
         private void createChildren(File fileRoot, DefaultMutableTreeNode node) {
             File[] files = fileRoot.listFiles();
-            if (files != null) {       
+            System.out.println(fileRoot.isDirectory());
+            System.out.println(fileRoot.canRead());
+            System.out.println(fileRoot.exists());
+            for (File f : files) {
+                System.out.println(f.toString());
+            }
+            if (files != null) {
                 for (File file : files) {
                     DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new FileNode(file));
                     node.add(childNode);
@@ -87,5 +99,17 @@ public class FileBrowser extends JFrame{
             String name = file.getName();
             return name.equals("") ? file.getAbsolutePath() : name;
         }
+    }
+
+    @Override
+    public void valueChanged(TreeSelectionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (node == null) return;
+
+        Object nodeInfo = node.getUserObject();
+        if (node.isLeaf()){
+            
+        }
+
     }
 }

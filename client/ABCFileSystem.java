@@ -71,8 +71,13 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         } else if (e.getSource() == btnUpload) {
             // TODO
             File file = fc.getSelectedFile();
-            Path path = Paths.get(System.getProperty("user.dir") + "\\");
-            // Files.copy(file, path.resolve(file.getName()));
+            Path path = Paths.get(System.getProperty("user.dir") + "\\cybersecurity\\ABCFS");
+            try {
+                Files.copy(file.toPath(), path.resolve(file.getName()));
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
         }
     }
     public void log(){
