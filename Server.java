@@ -43,7 +43,6 @@ public class Server extends JFrame{
 			int tmp = (int) (Math.pow(this.fromClient.readInt(), randNum) % prime);
 			msgArea.append("Key for user " + keys.size() + ": " + tmp + '\n');
 			keys.add(tmp);
-			toClient.writeInt(keys.size() - 1);
 			toClient.writeInt((int) (Math.pow(generator, randNum) % prime));
 			toClient.flush();
 		} catch (IOException e) {
