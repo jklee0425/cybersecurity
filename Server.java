@@ -90,7 +90,7 @@ public class Server extends JFrame{
 		
 		private DataInputStream in;
 		private DataOutputStream out;
-		Socket socket;
+		private Socket socket;
 		
 		private ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
 			this.in = in;
