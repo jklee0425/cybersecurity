@@ -32,7 +32,7 @@ public class Server extends JFrame{
 		msgArea.setEditable(false);
 		setLayout(new BorderLayout());
 		add(new JScrollPane(msgArea), BorderLayout.CENTER);
-		setTitle("Chatroom");
+		setTitle("Chatroom server");
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
@@ -93,42 +93,105 @@ public class Server extends JFrame{
 		private DataOutputStream out;
 		Socket socket;
 		
-		public ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
+		private ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
 			this.in = in;
 			this.out = out;
 			this.socket = socket;
 		}
 		
+		private void closeClient(int client) {
+			try {
+				keys.set(client, null);
+				clients.set(client, null);
+				clients.get(client).out.writeUTF(".");//client is still waiting for input after exiting, this closes it
+				clients.get(client).out.flush();
+				clients.get(client).socket.close();
+				clients.get(client).out.close();
+				clients.get(client).in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private String receivedMsg(int id) {
+			String tmp = "", msg = "";
+				try {
+					do {
+						tmp = AES.decrypt(in.readUTF(),keys.get(id)).trim();
+						if(!tmp.equals(".")) {
+							msg += tmp;
+						}
+					}while(!tmp.equals("."));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			return msg;
+		}
+		
+		private void sendMsg(int client, String msg) {
+			try {
+				for(int i = 0; i < msg.length(); i = i + 4) {
+					if(i + 4 < msg.length()) {
+						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, i + 4), keys.get(client)));
+					}
+					else {
+						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, msg.length()), keys.get(client)));
+					}
+					clients.get(client).out.flush();
+				}
+				clients.get(client).out.writeUTF(AES.encrypt(".", keys.get(client)));
+				clients.get(client).out.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private int findId() {
+			try {
+				String ping = in.readUTF();
+				for(int i = 0; i < keys.size(); i++) {
+					if(AES.decrypt(ping, keys.get(i)).trim().equals("ping")) {
+						return i;
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return -1;
+		}
+		
 		@Override
 		public void run() {
 			String msg, hash;
+			boolean running = true;
 			int id;
-			while(true) {
+			while(running == true) {
 				try {
-					id = in.readInt();
-					hash = AES.decrypt(in.readUTF(),keys.get(id)).trim();
-					msg = in.readUTF();
-					msgArea.append("Got msg from " + id + ": " + msg + '\n');
-					msg = AES.decrypt(msg, keys.get(id));
-					if(String.valueOf(msg.trim().hashCode()).equals(hash)) {
-						msgArea.append(msg.trim() + '\n');
-						if(msg.trim().equals(id+" has left")) {
-							keys.set(id, null);
-							clients.set(id, null);
-							clients.get(id).out.writeUTF("");//client is still waiting for input after exiting
-							clients.get(id).out.flush();
-						}
-						for(int i = clients.size()-1; i >= 0; i--) {
-							if(clients.get(i) != null) {
-								msgArea.append("Sending msg to user " + i + " with key " + keys.get(i) + '\n');
-								clients.get(i).out.writeUTF(AES.encrypt(msg, keys.get(i)));
-								clients.get(i).out.flush();
-							}
-						}
+					id = findId();
+					if(id == -1) {
+						msgArea.append("Key does not match\n");
 					}
 					else {
-						clients.get(id).out.writeUTF(AES.encrypt("Resend message", keys.get(id)));
-						clients.get(id).out.flush();
+						hash = AES.decrypt(in.readUTF(), keys.get(id)).trim();
+						msg = receivedMsg(id);
+						msgArea.append(String.valueOf(msg.hashCode()) + " vs " + hash);
+						if(hash.equals(String.valueOf(msg.hashCode()))) {
+							msgArea.append(msg + '\n');
+							if(msg.trim().equals(id+" has left")) {
+								closeClient(id);
+								running = false;
+							}
+							for(int i = clients.size()-1; i >= 0; i--) {
+								if(clients.get(i) != null) {
+									msgArea.append("Sending msg to user " + i + '\n');
+									sendMsg(i, msg);
+								}
+							}
+						}
+						else {
+							msgArea.append("Hash mismatch, can't validate integrity\n");
+							sendMsg(id, "Message_not_sent,_please_resend\n");
+						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
