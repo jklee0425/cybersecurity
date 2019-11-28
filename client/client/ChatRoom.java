@@ -34,7 +34,7 @@ public class ChatRoom extends JFrame {
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int prime, generator, randNum, id, key;
+	private int prime, generator, randNum, key;
 	private String host;
 	private boolean runnable = true;
 
@@ -154,6 +154,10 @@ public class ChatRoom extends JFrame {
 			if(!tmp.equals(".")) {
 				msg += tmp;
 			}
+			else if(tmp.equals("exit")) {
+				runnable = false;
+				break;
+			}
 		}while(!tmp.equals("."));
 		msgArea.append(msg.replaceAll("`", " ") + '\n');
 	}
@@ -162,9 +166,9 @@ public class ChatRoom extends JFrame {
 		String tmp;
 		try {
 			toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
-			for(int i = 0; i < msg.length(); i=i+4) {
-				if(i + 4 < msg.length()) {
-					tmp = msg.substring(i, i+4);
+			for(int i = 0; i < msg.length(); i=i+15) {
+				if(i + 15 < msg.length()) {
+					tmp = msg.substring(i, i+15);
 				}
 				else {
 					tmp = msg.substring(i, msg.length());
@@ -178,8 +182,8 @@ public class ChatRoom extends JFrame {
 			e.printStackTrace();
 		}
 	}
-
-	private class msgListener implements ActionListener {
+	
+	private class msgListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			try {
 				toServer.writeUTF(AES.encrypt("ping", key));
