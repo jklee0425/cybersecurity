@@ -7,21 +7,22 @@ import java.time.LocalTime;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import client.*;
-
 public class Login extends JFrame implements ActionListener{
     /**
      *
      */
     private static final long serialVersionUID = 1L;
+    private final String[] ROLES = {"Salesperson", "Warehouse"};
     private JTextField tfUsername;
     private JPasswordField pfPassword;
+    private JComboBox cbRole;
     private JLabel lbUsername;
     private JLabel lbPassword;
     private JButton btnLogin;
@@ -34,6 +35,9 @@ public class Login extends JFrame implements ActionListener{
         JPanel pwPanel = new JPanel();
         lbPassword = new JLabel(Helper.LABELS[1]);
         pfPassword = new JPasswordField(Helper.INPUT_LENGTH);
+        cbRole = new JComboBox<String>(ROLES);
+        cbRole.addActionListener(this);
+
 
         idPanel.add(lbUsername);
         idPanel.add(tfUsername);
@@ -43,7 +47,7 @@ public class Login extends JFrame implements ActionListener{
         userInputPanel.setLayout(new BoxLayout(userInputPanel, BoxLayout.Y_AXIS));
         userInputPanel.add(idPanel);
         userInputPanel.add(pwPanel);
-
+        userInputPanel.add(cbRole);
         JPanel btnPanel = new JPanel();
         btnLogin = new JButton("Log in");
         btnLogin.addActionListener(this);
@@ -61,9 +65,14 @@ public class Login extends JFrame implements ActionListener{
         setVisible(true);
     }
     public void actionPerformed(ActionEvent e) {
-        if(isAllowed(Helper.getUsername(tfUsername))){
-            dispose();
-            new client.Session(Helper.getUsername(tfUsername));
+        Object src = e.getSource();
+        if(src == btnLogin) {
+            if(isAllowed(Helper.getUsername(tfUsername))){
+                dispose();
+                new client.Session(Helper.getUsername(tfUsername));
+            }
+        }else if(src == cbRole){
+            
         }
     }
     /**

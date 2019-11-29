@@ -1,4 +1,4 @@
-package clientServer;
+//package clientServer;
 
 import java.util.Random;
 

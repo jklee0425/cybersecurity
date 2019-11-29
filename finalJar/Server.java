@@ -1,4 +1,4 @@
-package clientServer;
+//package clientServer;
 
 import java.awt.BorderLayout;
 import java.io.BufferedInputStream;
@@ -90,7 +90,7 @@ public class Server extends JFrame{
 		
 		private DataInputStream in;
 		private DataOutputStream out;
-		private Socket socket;
+		Socket socket;
 		
 		private ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
 			this.in = in;

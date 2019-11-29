@@ -1,4 +1,4 @@
-package client;
+//package client;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -23,7 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
-import clientServer.AES.*;
+//import clientServer.AES.*;
 public class ChatRoom extends JFrame {
 	// @summary Creates a client for a chatroom
 
@@ -34,7 +34,7 @@ public class ChatRoom extends JFrame {
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int prime, generator, randNum, id, key;
+	private int prime, generator, randNum, key;
 	private String host;
 	private boolean runnable = true;
 	
@@ -113,7 +113,7 @@ public class ChatRoom extends JFrame {
 		    });
 		setJMenuBar(menuBar);
 	}
-	public Client(int port, String host){
+	public ChatRoom(int port, String host){
 		buildGUI();
 		try {
 			Random gen = new Random();
@@ -195,6 +195,6 @@ public class ChatRoom extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		new ChatRoom(8081, "User");
+		//new ChatRoom(8081, "User");
 	}
 }

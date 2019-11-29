@@ -23,7 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
-import clientServer.AES.*;
+import clientServer.AES;
 public class ChatRoom extends JFrame {
 	// @summary Creates a client for a chatroom
 
@@ -37,21 +37,21 @@ public class ChatRoom extends JFrame {
 	private int prime, generator, randNum, id, key;
 	private String host;
 	private boolean runnable = true;
-	
+
 	public void buildGUI() {
 		final int FRAME_WIDTH = 700;
 		final int FRAME_HEIGHT = 200;
-		
-	JPanel panel = new JPanel();
+
+		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
 
 		msgField = new JTextField("");
 		msgField.addActionListener(new msgListener());
-		
+
 		panel.setLayout(new BorderLayout());
 		panel.add(label, BorderLayout.WEST);
 		panel.add(msgField, BorderLayout.CENTER);
-		
+
 		msgArea = new JTextArea();
 		msgArea.setEditable(false);
 		setLayout(new BorderLayout());
@@ -64,43 +64,42 @@ public class ChatRoom extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
-	
-	public void diffieHellman(){
+
+	public void diffieHellman() {
 		msgArea.append("Sending key\n");
 		try {
 			toServer.writeInt((int) (Math.pow(generator, randNum) % prime));
 			toServer.flush();
 			msgArea.append("Key sent\n");
+			id = fromServer.readInt();
 			key = (int) (Math.pow(fromServer.readInt(), randNum) % prime);
 			msgArea.append("Received key from server: " + key + "\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
 		menuBar.add(menuExit);
-	    menuExit.addMenuListener(new MenuListener() {
-	    	
-	    	@Override
-	    	public void menuSelected(MenuEvent e) {
-					try {
-						runnable = false;
-						msgArea.append("Exiting");
-						toServer.writeUTF(AES.encrypt("ping", key));
-						toServer.flush();
-						sendMsg(host + " has left");
-						dispose();
-						socket.close();
-						toServer.close();
-						fromServer.close();
-						System.exit(0);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-		      }
+		menuExit.addMenuListener(new MenuListener() {
+			@Override
+			public void menuSelected(MenuEvent e) {
+				try {
+					runnable = false;
+					msgArea.append("Exiting");
+					toServer.writeUTF(AES.encrypt("ping", key));
+					toServer.flush();
+					sendMsg(id + " has left");
+					dispose();
+					socket.close();						toServer.close();
+					fromServer.close();
+					System.exit(0);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 
 			@Override
 			public void menuDeselected(MenuEvent e) {
@@ -110,10 +109,11 @@ public class ChatRoom extends JFrame {
 			public void menuCanceled(MenuEvent e) {
 			}
 
-		    });
+		});
 		setJMenuBar(menuBar);
 	}
-	public Client(int port, String host){
+
+	public ChatRoom(int port, String host) {
 		buildGUI();
 		try {
 			Random gen = new Random();
@@ -122,25 +122,26 @@ public class ChatRoom extends JFrame {
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			this.host = host;
-	      	this.randNum = gen.nextInt(9) + 1;
+			this.randNum = gen.nextInt(9) + 1;
 			this.prime = 13;
-			this.generator = 6; 
-		}
-		catch(Exception e) {
+			this.generator = 6;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		msgArea.append("There is a 14 character limit for messages\n");
 		diffieHellman();
 		Thread read = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(runnable == true) {
+				String msg;
+				while (runnable == true) {
 					try {
 						receiveMsg();
-					} catch(IOException e) {
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
-				
+
 			}
 		});
 		read.start();
