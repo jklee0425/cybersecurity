@@ -34,7 +34,7 @@ public class ChatRoom extends JFrame {
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int prime, generator, randNum, key;
+	private int prime, generator, randNum, id, key;
 	private String host;
 	private boolean runnable = true;
 

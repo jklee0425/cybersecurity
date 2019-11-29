@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - FileBrowser",
+            "request": "launch",
+            "mainClass": "client.FileBrowser",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - ChatRoom",
             "request": "launch",
             "mainClass": "client.ChatRoom",
