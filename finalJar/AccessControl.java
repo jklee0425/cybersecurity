@@ -60,7 +60,7 @@ public class AccessControl {
         PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
         preparedStatement.setString(1,rolename);
         ResultSet myRs = preparedStatement.executeQuery();
-        keyConn.close();
+        
         int id = -1;
         while(myRs.next()){
             id = myRs.getInt("key_val");
@@ -68,6 +68,7 @@ public class AccessControl {
         if(id == -1){
             System.out.println("Login Server is down");
         }
+        keyConn.close();
         return id;
         }catch(SQLException e){
             System.out.println("Failed to get roles");
