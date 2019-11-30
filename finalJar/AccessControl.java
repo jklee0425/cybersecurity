@@ -1,4 +1,5 @@
 
+import java.sql.*;
 import java.util.ArrayList;
 
 /*
@@ -13,32 +14,12 @@ import java.util.ArrayList;
  */
 public class AccessControl {
 
-    private static String[] roleArray = {"CUSTODIAN","SALESPERSON","WAREHOUSE"};
-    private static boolean[] readWrite = new boolean[2];
-    public static String loginDatabase = "jdbc:mysql://35.247.4.229:3306/LoginSchema";
-    public static String accountDatabase = "jdbc:mysql://35.247.4.229:3306/Accounts";
-    public static String inventoryDatabase = "jdbc:mysql://35.247.4.229:3306/Inventory";
-    /*
-    public static boolean writePrivelege(String userRole){
-        //only TOP_ADMIN role can write to the server
-        if(userRole != SUPERUSER){
-            return false;
-        }
-        return true;
-    }
-    */
-    /*
-    public static boolean readPrivelege(String userRole){
-    //employee from TOP ADMIN to EMPLOYE can read
-    if(userRole != SUPERUSER || userRole != EMPLOYEE){
-        return false;
-    }
-    return true;
-    }
-    */
-    public static String showCommands(){
-        return "This will be a list of commands that will be set later";
-    }
+    private static String[] roleArray = {"SALESPERSON","WAREHOUSE"};
+   
+    public static String loginDatabase = "jdbc:mysql://34.83.70.56:3306/LoginSchema";
+    public static String accountDatabase = "jdbc:mysql://34.83.70.56:3306/Accounts";
+    public static String inventoryDatabase = "jdbc:mysql://34.83.70.56:3306/Inventory";
+
     
     public static String getGrantsUsername(String grantString){
         String substring = grantString.substring(11,grantString.length());
@@ -72,11 +53,30 @@ public class AccessControl {
     }
     
     public static int getRoleKey(String rolename){
-        if(rolename.equals("WAREHOUSE")){
-            return 101;
-        }else if(rolename.equals("SALESPERSON")){
-            return 302;
+        Connection keyConn;
+        try{
+        keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+        String sql = "SELECT key_val FROM roles WHERE role_name = ?";
+        PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+        preparedStatement.setString(1,rolename);
+        ResultSet myRs = preparedStatement.executeQuery();
+        keyConn.close();
+        int id = -1;
+        while(myRs.next()){
+            id = myRs.getInt("key_val");
         }
+        if(id == -1){
+            System.out.println("Login Server is down");
+        }
+        return id;
+        }catch(SQLException e){
+            System.out.println("Failed to get roles");
+            e.printStackTrace();
+            System.exit(0);
+        }
+        
+       
+        
         return -1;
     }
     public static boolean validRole(String rolename){
@@ -88,18 +88,5 @@ public class AccessControl {
         }
         return false;
     }
-    /*
-    public static String getViewName(String input){
-        String format = input.toUpperCase();
-        
-        if(format.equals("GERMANY")){
-            return "Germany_View";
-        }else if(format.equals("NEW YORK")){
-            return "New_York_View";
-        } else if(format.equals("VANCOUVER")){
-            return "Vancouver_View";
-        }
-        return "ERORR";
-    }
-*/
+ 
 }
