@@ -39,7 +39,7 @@ public class AccessControl {
         return false;
     }
     
-    public static int returnRoleID(String rolename){
+    public static int getRoleID(String rolename){
         if(rolename.equals("WAREHOUSE")){
             return 100;
         } else if(rolename.equals("SALESPERSON")){
@@ -47,7 +47,37 @@ public class AccessControl {
         }
         return -1;
     }
-    
+
+    public static String getRoleName(int roleID){
+        return roleID == 100 ? roleArray[0] : roleID == 101 ? roleArray[1] : "";
+    }
+
+    public static String getBranchName(String userName) {
+        // TODO
+        Connection keyConn;
+        String retVal = "";
+        try{
+            keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+            String sql = "SELECT branch FROM user WHERE username = ?";
+            PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+            preparedStatement.setString(1, userName);
+            ResultSet myRs = preparedStatement.executeQuery();
+            
+            while(myRs.next()){
+                retVal = myRs.getString("branch");
+            }
+            if(retVal.equals("")){
+                System.out.println("Login Server is down");
+            }
+            keyConn.close();
+            return retVal;
+        }catch(SQLException e){
+            System.out.println("Failed to get roles");
+            e.printStackTrace();
+            System.exit(0);
+        }
+        return retVal;
+    }
     public static int getRoleKey(String rolename){
         Connection keyConn;
         try{

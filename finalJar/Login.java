@@ -15,13 +15,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import Database.AccessControl;
-import clientServer.AES;
-import client.Session;
+import org.graalvm.compiler.nodes.memory.Access;
 
 public class Login extends JFrame implements ActionListener{
     private final String[] ROLES = {"Salesperson", "Warehouse"};
@@ -31,7 +30,8 @@ public class Login extends JFrame implements ActionListener{
     private JLabel lbUsername;
     private JLabel lbPassword;
     private JButton btnLogin;
-    private String role;
+    private int role;
+    private String branch;
     public Login() {
         JPanel userInputPanel = new JPanel();
         JPanel idPanel = new JPanel();
@@ -68,19 +68,19 @@ public class Login extends JFrame implements ActionListener{
         setVisible(true);
     }
     public void actionPerformed(ActionEvent e) {
-        String roleName = cbRole.getSelectedItem().toString();
+        String roleName = cbRole.getSelectedItem().toString().toUpperCase();
         String name = Helper.getUsername(tfUsername);
-        int role = Database.AccessControl.getRoleKey(roleName);
+        String branch = AccessControl.getBranchName(name);
+        role = AccessControl.getRoleID(roleName);
         /**
          * TODO 
          * - include sanity check with Database.AccessControl.getRoleKey
-         * - retrieve branch name from the userinput and pass it down to Session as a parameter
          */ 
         if(authenticate(name, Helper.getPassword(pfPassword)) && isAllowed(name)){
             dispose();
             new client.Session(name, role, branch);
         }else{
-            
+            new JOptionPane(new String("Authenticate failed"));
         }
     }
     /**

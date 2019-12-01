@@ -24,13 +24,12 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
     private JButton btnJoin;
     private JButton btnAccess;
     private JButton btnLogOut;
-    private String username, branch;
-    private int roleID;
+    private String username, branch, role;
     private final int CHATROOM_PORT = 8081;
     
     public Session(String username, int roleID, String branch) {
         this.username = username;
-        this.roleID = roleID;
+        this.role = AccessControl.getRoleName(roleID);
         this.branch = branch;
         JPanel userInfoPn = new JPanel();
         lbUserInfo = new JLabel("Logged in as " + username);
@@ -100,7 +99,7 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
                 new ChatRoom(index + CHATROOM_PORT, username);
             }
         } else if (e.getSource() == btnAccess) {
-            new ABCFileSystem(branch, roleID);
+            new ABCFileSystem(branch, role);
         } else if (e.getSource() == btnLogOut) {
             System.exit(0);
         }

@@ -19,7 +19,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
     JButton btnSave;
     JButton btnUpload;
     JLabel lbFile;
-    private String userRank, userBranch;
+    private String userRole, userBranch;
 
     public void buildGUI() {
         setLayout(new BorderLayout());
@@ -53,19 +53,19 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    public ABCFileSystem(String branch, int rank) {
+    public ABCFileSystem(String branch, String role) {
         buildGUI();
-        userRank = rank == 101 ? "Warehouse" : rank == 302 ? "Sales" : "";
-        userBranch = branch;
+        this.userRole = role;
+        this.userBranch = branch;
         fc = new JFileChooser();
     }
     public static void main(String[] args) {
-        new ABCFileSystem("", 0);
+        new ABCFileSystem("", "Sales");
     }
     @Override
     public void actionPerformed(ActionEvent e) {
         int retVal;
-        String accessiblePath = System.getProperty("user.dir") + "\\ABCFS" + userBranch + userRank;
+        String accessiblePath = System.getProperty("user.dir") + "\\ABCFS" + userBranch + userRole;
         Object src = e.getSource();
         if (src == btnFind) {
             File fileRoot = new File(accessiblePath);
