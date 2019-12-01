@@ -1,6 +1,5 @@
 package Database;
 import java.sql.*;
-import java.util.ArrayList;
 import clientServer.AES;
 
 public class Salesperson {
@@ -78,26 +77,24 @@ public void listViews(){
 
     public void viewData(String input){
         System.out.println(input);
-    try{
-        String sql = "SELECT * FROM "+ input;
-      
-        Statement viewStmt = myConn.createStatement();
-        myRs = viewStmt.executeQuery(sql);
-        System.out.println("Name:Brand:Year:Stock");
-        while(myRs.next()){
-            String name = myRs.getString("Plane Name");
-            String brand = myRs.getString("Brand");
-            int year = myRs.getInt("Year");
-            int stock = myRs.getInt("Stock");
-            System.out.println(name + ":" + brand +":"+year+":"+stock);
+        try{
+            String sql = "SELECT * FROM "+ input;
+        
+            Statement viewStmt = myConn.createStatement();
+            myRs = viewStmt.executeQuery(sql);
+            System.out.println("Name:Brand:Year:Stock");
+            while(myRs.next()){
+                String name = myRs.getString("Plane Name");
+                String brand = myRs.getString("Brand");
+                int year = myRs.getInt("Year");
+                int stock = myRs.getInt("Stock");
+                System.out.println(name + ":" + brand +":"+year+":"+stock);
+            }
+        }catch(SQLException e){
+            System.out.println("SELECTING FROM VIEW ERROR");
+            e.printStackTrace();
+            System.exit(0);
         }
-    }catch(SQLException e){
-        System.out.println("SELECTING FROM VIEW ERROR");
-        e.printStackTrace();
-        System.exit(0);
-    }
-    
-    
     }
 
 

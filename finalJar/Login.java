@@ -38,8 +38,6 @@ public class Login extends JFrame implements ActionListener{
         lbPassword = new JLabel(Helper.LABELS[1]);
         pfPassword = new JPasswordField(Helper.INPUT_LENGTH);
         cbRole = new JComboBox<String>(ROLES);
-        //cbRole.addActionListener(this);
-
 
         idPanel.add(lbUsername);
         idPanel.add(tfUsername);
@@ -62,7 +60,7 @@ public class Login extends JFrame implements ActionListener{
 
         pack();
         setTitle("ABC Airlines");
-        setSize(Helper.FRAME_WIDTH, Helper.FRAME_HEIGHT);
+        setSize(350, 180);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -70,13 +68,12 @@ public class Login extends JFrame implements ActionListener{
         Object src = e.getSource();
         if(src == btnLogin) {
             //if(isAllowed(Helper.getUsername(tfUsername) )){
-            if(authenticate(tfUsername.getText(),new String(pfPassword.getPassword()))){
+            if(authenticate(Helper.getUsername(tfUsername), Helper.getPassword(pfPassword))){
                 dispose();
                 new Session(Helper.getUsername(tfUsername));
+            }else{
+                JOptionPane.showMessageDialog(null, "Wrong Password");
             }
-        }else{
-            JOptionPane.showMessageDialog(null, "Wrong Password");
-
         }
     }
     /**

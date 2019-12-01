@@ -58,7 +58,6 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         userRank = rank == 101 ? "Warehouse" : rank == 302 ? "Sales" : "";
         userBranch = branch;
         fc = new JFileChooser();
-        // fc.remove(2);
     }
     public static void main(String[] args) {
         new ABCFileSystem("", 0);

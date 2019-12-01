@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Session",
+            "request": "launch",
+            "mainClass": "finalJar.Session",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Login",
+            "request": "launch",
+            "mainClass": "finalJar.Login",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - FileBrowser",
             "request": "launch",
             "mainClass": "client.FileBrowser",

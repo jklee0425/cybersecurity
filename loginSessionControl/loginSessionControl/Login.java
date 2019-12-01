@@ -21,12 +21,9 @@ import javax.swing.JTextField;
 
 import Database.AccessControl;
 import clientServer.AES;
+import client.Session;
 
 public class Login extends JFrame implements ActionListener{
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
     private final String[] ROLES = {"Salesperson", "Warehouse"};
     private JTextField tfUsername;
     private JPasswordField pfPassword;
@@ -75,9 +72,17 @@ public class Login extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if(src == btnLogin) {
-            if(isAllowed(Helper.getUsername(tfUsername))){
+            String roleName = cbRole.getSelectedItem().toString();
+            String name = Helper.getUsername(tfUsername);
+            int role = Database.AccessControl.getRoleKey(roleName);
+            /**
+             * TODO 
+             * - include sanity check with Database.AccessControl.getRoleKey
+             * - retrieve branch name from the userinput and pass it down to Session as a parameter
+             */ 
+            if(authenticate(name, Helper.getPassword(pfPassword)) && isAllowed(name)){
                 dispose();
-                new client.Session(Helper.getUsername(tfUsername));
+                new client.Session(name, role, "");
             }
         }else if(src == cbRole){
             

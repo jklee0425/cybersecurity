@@ -40,11 +40,7 @@ public class AccessControl {
     }
     
     public static int returnRoleID(String rolename){
-        
-       
-      
         if(rolename.equals("WAREHOUSE")){
-            
             return 100;
         } else if(rolename.equals("SALESPERSON")){
             return 101;
@@ -55,29 +51,26 @@ public class AccessControl {
     public static int getRoleKey(String rolename){
         Connection keyConn;
         try{
-        keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
-        String sql = "SELECT key_val FROM roles WHERE role_name = ?";
-        PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
-        preparedStatement.setString(1,rolename);
-        ResultSet myRs = preparedStatement.executeQuery();
-        
-        int id = -1;
-        while(myRs.next()){
-            id = myRs.getInt("key_val");
-        }
-        if(id == -1){
-            System.out.println("Login Server is down");
-        }
-        keyConn.close();
-        return id;
+            keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+            String sql = "SELECT key_val FROM roles WHERE role_name = ?";
+            PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+            preparedStatement.setString(1,rolename);
+            ResultSet myRs = preparedStatement.executeQuery();
+            
+            int id = -1;
+            while(myRs.next()){
+                id = myRs.getInt("key_val");
+            }
+            if(id == -1){
+                System.out.println("Login Server is down");
+            }
+            keyConn.close();
+            return id;
         }catch(SQLException e){
             System.out.println("Failed to get roles");
             e.printStackTrace();
             System.exit(0);
         }
-        
-       
-        
         return -1;
     }
     public static boolean validRole(String rolename){
