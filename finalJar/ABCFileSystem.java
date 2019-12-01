@@ -88,7 +88,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             Path path = Paths.get(accessiblePath);
             try {
                 Files.copy(file.toPath(), path.resolve(file.getName()));
-                AccessControl.logger(userName, " has uploaded a file: " + file.getName());
+                AccessControl.generateLog(userName, " Uploaded a file: " + file.getName());
             } catch (Exception e1) {
                 showMessageDialog(null, "Please select a file");
             }
@@ -97,7 +97,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             Path path = Paths.get(System.getProperty("user.home") + "\\Downloads");
             try {
                 Files.copy(file.toPath(), path.resolve(file.getName()));
-                AccessControl.logger(userName, " has downloaded a file: " + file.getName());
+                AccessControl.generateLog(userName, "Downloaded a file: " + file.getName());
             } catch (Exception e1) {
                 showMessageDialog(null, "Please select a file");
             }
