@@ -31,7 +31,7 @@ public class Login extends JFrame implements ActionListener{
     private JLabel lbUsername;
     private JLabel lbPassword;
     private JButton btnLogin;
-
+    private String role;
     public Login() {
         JPanel userInputPanel = new JPanel();
         JPanel idPanel = new JPanel();
@@ -78,7 +78,7 @@ public class Login extends JFrame implements ActionListener{
          */ 
         if(authenticate(name, Helper.getPassword(pfPassword)) && isAllowed(name)){
             dispose();
-            new client.Session(name, role, "");
+            new client.Session(name, role, branch);
         }else{
             
         }
@@ -105,18 +105,19 @@ public class Login extends JFrame implements ActionListener{
      */
     private boolean authenticate(String username, String password) {
         // TODO; Example
-        String sql = "SELECT userName FROM userInfo WHERE userName=? and userPass=?";
+        String sql = "SELECT userName,branch FROM userInfo WHERE userName=? and userPass=?";
         //System.out.println("ROLE SELECTED IS: " + cbRole.getSelectedItem());
         try{
             Connection myConn = DriverManager.getConnection(AccessControl.accountDatabase, "sampleuser", "CodeHaze1");
             PreparedStatement prepState = (PreparedStatement) myConn.prepareStatement(sql);
             int key = AccessControl.getRoleKey(cbRole.getSelectedItem().toString().toUpperCase());
-            //System.out.println("key: " + key);
+            
             prepState.setString(1, AES.encrypt(username, key));
             prepState.setString(2, AES.encrypt(password, key));
             ResultSet myRs = prepState.executeQuery();
             int count = 0;
             while(myRs.next()){
+                branch = myRs.getString("branch");
                 count++;
             }
             if(count == 1){
