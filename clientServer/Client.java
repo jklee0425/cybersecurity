@@ -29,7 +29,7 @@ public class Client extends JFrame{
 	private DataInputStream fromServer;
 	private InetAddress address;
 	private Socket socket;
-	private int prime, generator, randNum, id, key;
+	private int prime, generator, randNum, key;
 	private String host;
 	private boolean runnable = true;
 	
@@ -56,7 +56,7 @@ public class Client extends JFrame{
 
 		setTitle("Chatroom client");
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setVisible(true);
 	}
 	
@@ -66,7 +66,6 @@ public class Client extends JFrame{
 			toServer.writeInt((int) (Math.pow(generator, randNum) % prime));
 			toServer.flush();
 			msgArea.append("Key sent\n");
-			id = fromServer.readInt();
 			key = (int) (Math.pow(fromServer.readInt(), randNum) % prime);
 			msgArea.append("Received key from server: " + key + "\n");
 		} catch (IOException e) {
@@ -74,7 +73,17 @@ public class Client extends JFrame{
 		}
 	}
 	
-	public void createMenuBar() {
+	private void closeClient() throws IOException{
+		msgArea.append("Exiting");
+		runnable = false;
+		sendMsg(host + " has left");
+		dispose();
+		toServer.close();
+		fromServer.close();
+		socket.close();
+	}
+	
+	public void createMenuBar(){
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
 		menuBar.add(menuExit);
@@ -82,21 +91,11 @@ public class Client extends JFrame{
 	    	
 	    	@Override
 	    	public void menuSelected(MenuEvent e) {
-					try {
-						runnable = false;
-						String send = id + " has left";
-						msgArea.append("Exiting");
-						toServer.writeInt(id);
-						toServer.writeUTF(AES.encrypt(String.valueOf(send.hashCode()), key));
-						toServer.writeUTF(AES.encrypt(send,key));
-						toServer.flush();
-						dispose();
-						socket.close();
-						toServer.close();
-						fromServer.close();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+	    		try {
+					closeClient();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 		      }
 
 			@Override
@@ -110,51 +109,76 @@ public class Client extends JFrame{
 		    });
 		setJMenuBar(menuBar);
 	}
-	public Client(int port, String host) {
+	public Client(int port, String host){
 		buildGUI();
+		Random gen = new Random();
 		try {
-			Random gen = new Random();
 			this.address = InetAddress.getLocalHost();
 			this.socket = new Socket(address.getLoopbackAddress(), port);
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			this.host = host;
-	      	this.randNum = gen.nextInt(9) + 1;
+			this.randNum = gen.nextInt(9) + 1;
 			this.prime = 13;
 			this.generator = 6; 
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		msgArea.append("There is a 14 character limit for messages\n");
-		diffieHellman();
-		Thread read = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String msg;
-				while(runnable == true) {
-					try {
-						msg = fromServer.readUTF();
-						msgArea.append(AES.decrypt(msg, key).trim() + '\n');
-					} catch(IOException e) {
-						e.printStackTrace();
+			diffieHellman();
+			Thread read = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while(runnable == true) {
+						try {
+							receiveMsg();
+						} catch(IOException e) {
+							e.printStackTrace();
+						}
 					}
-				}
 				
-			}
-		});
-		read.start();
+				}
+			});
+			read.start();
+			sendMsg(host + " has joined");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 	
-
+	private void receiveMsg() throws IOException {
+		String tmp = "", msg = "";
+		do {
+			tmp = AES.decrypt(fromServer.readUTF(), key).trim();
+			if(!tmp.equals(".")) {
+				msg += tmp;
+			}
+			else if(tmp.equals("exit")) {
+				runnable = false;
+				break;
+			}
+		}while(!tmp.equals("."));
+		msgArea.append(msg.replaceAll("`", " ") + '\n');
+	}
+	
+	private void sendMsg(String msg) throws IOException{
+		String tmp;
+		toServer.writeUTF(AES.encrypt("ping", key));
+		toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
+		for(int i = 0; i < msg.length(); i=i+15) {
+			if(i + 15 < msg.length()) {
+				tmp = msg.substring(i, i+15);
+			}
+			else {
+				tmp = msg.substring(i, msg.length());
+			}
+			toServer.writeUTF(AES.encrypt(tmp, key));
+			toServer.flush();
+		}
+		toServer.writeUTF(AES.encrypt(".", key));
+		toServer.flush();
+	}
+	
 	private class msgListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			try {
-				toServer.writeInt(id);
-				String msg = id + ">" + msgField.getText().trim();
-				toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
-				toServer.writeUTF(AES.encrypt(msg,key));
-				toServer.flush();
+				sendMsg(host + ">" + msgField.getText().trim().replaceAll(" ", "`"));
 				msgField.setText("");
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -162,7 +186,7 @@ public class Client extends JFrame{
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args){
 		new Client(8081, "User");
 	}
 }
