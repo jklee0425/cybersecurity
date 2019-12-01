@@ -42,7 +42,7 @@ public class ChatRoom extends JFrame {
 		final int FRAME_WIDTH = 700;
 		final int FRAME_HEIGHT = 200;
 		
-	JPanel panel = new JPanel();
+		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
 
 		msgField = new JTextField("");
@@ -61,7 +61,7 @@ public class ChatRoom extends JFrame {
 
 		setTitle("Chatroom client");
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setVisible(true);
 	}
 	
@@ -78,29 +78,30 @@ public class ChatRoom extends JFrame {
 		}
 	}
 	
+	private void closeClient() throws IOException{
+		msgArea.append("Exiting");
+		runnable = false;
+		sendMsg(host + " has left");
+		dispose();
+		toServer.close();
+		fromServer.close();
+		socket.close();
+	}
+	
 	public void createMenuBar() {
 		menuBar = new JMenuBar();
 		JMenu menuExit = new JMenu("Exit Chat Room");
 		menuBar.add(menuExit);
-	    menuExit.addMenuListener(new MenuListener() {
+	    	menuExit.addMenuListener(new MenuListener() {
 	    	
-	    	@Override
-	    	public void menuSelected(MenuEvent e) {
-					try {
-						runnable = false;
-						msgArea.append("Exiting");
-						toServer.writeUTF(AES.encrypt("ping", key));
-						toServer.flush();
-						sendMsg(host + " has left");
-						dispose();
-						socket.close();
-						toServer.close();
-						fromServer.close();
-						System.exit(0);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-		      }
+	    		@Override
+	    		public void menuSelected(MenuEvent e) {
+				try {
+					closeClient()
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 
 			@Override
 			public void menuDeselected(MenuEvent e) {
@@ -115,35 +116,37 @@ public class ChatRoom extends JFrame {
 	}
 	public ChatRoom(int port, String host){
 		buildGUI();
+		Random gen = new Random();
 		try {
-			Random gen = new Random();
 			this.address = InetAddress.getLocalHost();
 			this.socket = new Socket(address.getLoopbackAddress(), port);
 			this.fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			this.toServer = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			this.host = host;
-	      	this.randNum = gen.nextInt(9) + 1;
+	      		this.randNum = gen.nextInt(9) + 1;
 			this.prime = 13;
 			this.generator = 6; 
+			diffieHellman();
+			Thread read = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while(runnable == true) {
+						try {
+							receiveMsg();
+						} catch(IOException e) {
+							e.printStackTrace();
+						}
+					}	
+				}
+			});
+			read.start();
+			sendMsg(host + " has joined");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
-		diffieHellman();
-		Thread read = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(runnable == true) {
-					try {
-						receiveMsg();
-					} catch(IOException e) {
-						e.printStackTrace();
-					}
-				}
-				
-			}
-		});
-		read.start();
+
+
 	}
 	
 	private void receiveMsg() throws IOException {
@@ -161,31 +164,27 @@ public class ChatRoom extends JFrame {
 		msgArea.append(msg.replaceAll("`", " ") + '\n');
 	}
 	
-	private void sendMsg(String msg) {
+	private void sendMsg(String msg) throws IOException{
 		String tmp;
-		try {
-			toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
-			for(int i = 0; i < msg.length(); i=i+15) {
-				if(i + 15 < msg.length()) {
-					tmp = msg.substring(i, i+15);
-				}
-				else {
-					tmp = msg.substring(i, msg.length());
-				}
-				toServer.writeUTF(AES.encrypt(tmp, key));
-				toServer.flush();
+		toServer.writeUTF(AES.encrypt("ping", key));
+		toServer.writeUTF(AES.encrypt(String.valueOf(msg.hashCode()), key));
+		for(int i = 0; i < msg.length(); i=i+15) {
+			if(i + 15 < msg.length()) {
+				tmp = msg.substring(i, i+15);
 			}
-			toServer.writeUTF(AES.encrypt(".", key));
+			else {
+				tmp = msg.substring(i, msg.length());
+			}
+			toServer.writeUTF(AES.encrypt(tmp, key));
 			toServer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		toServer.writeUTF(AES.encrypt(".", key));
+		toServer.flush();
 	}
 	
 	private class msgListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			try {
-				toServer.writeUTF(AES.encrypt("ping", key));
 				sendMsg(host + ">" + msgField.getText().trim().replaceAll(" ", "`"));
 				msgField.setText("");
 			} catch (IOException e1) {
