@@ -97,7 +97,7 @@ public class ChatRoom extends JFrame {
 	    		@Override
 	    		public void menuSelected(MenuEvent e) {
 				try {
-					closeClient()
+					closeClient();
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}

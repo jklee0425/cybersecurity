@@ -1,9 +1,13 @@
-package finalJar;
+package loginSessionControl;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.time.LocalTime;
 
 import javax.swing.BoxLayout;
@@ -11,16 +15,15 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import Database.AccessControl;
+import clientServer.AES;
+import client.Session;
+
 public class Login extends JFrame implements ActionListener{
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
     private final String[] ROLES = {"Salesperson", "Warehouse"};
     private JTextField tfUsername;
     private JPasswordField pfPassword;
@@ -38,6 +41,8 @@ public class Login extends JFrame implements ActionListener{
         lbPassword = new JLabel(Helper.LABELS[1]);
         pfPassword = new JPasswordField(Helper.INPUT_LENGTH);
         cbRole = new JComboBox<String>(ROLES);
+        cbRole.addActionListener(this);
+
 
         idPanel.add(lbUsername);
         idPanel.add(tfUsername);
@@ -60,20 +65,27 @@ public class Login extends JFrame implements ActionListener{
 
         pack();
         setTitle("ABC Airlines");
-        setSize(350, 180);
+        setSize(Helper.FRAME_WIDTH, Helper.FRAME_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if(src == btnLogin) {
-            //if(isAllowed(Helper.getUsername(tfUsername) )){
-            if(authenticate(Helper.getUsername(tfUsername), Helper.getPassword(pfPassword))){
+            String roleName = cbRole.getSelectedItem().toString();
+            String name = Helper.getUsername(tfUsername);
+            int role = Database.AccessControl.getRoleKey(roleName);
+            /**
+             * TODO 
+             * - include sanity check with Database.AccessControl.getRoleKey
+             * - retrieve branch name from the userinput and pass it down to Session as a parameter
+             */ 
+            if(authenticate(name, Helper.getPassword(pfPassword)) && isAllowed(name)){
                 dispose();
-                new Session(Helper.getUsername(tfUsername));
-            }else{
-                JOptionPane.showMessageDialog(null, "Wrong Password");
+                new client.Session(name, role, "");
             }
+        }else if(src == cbRole){
+            
         }
     }
     /**
@@ -95,18 +107,18 @@ public class Login extends JFrame implements ActionListener{
      * @param username  id to check from the database
      * @param pw        password to compare
      * @return return true if the password matches the username, otherwise false.
-     *///old param is bye[] pw
+     */
     private boolean authenticate(String username, String password) {
         // TODO; Example
         String sql = "SELECT userName FROM userInfo WHERE userName=? and userPass=?";
         //System.out.println("ROLE SELECTED IS: " + cbRole.getSelectedItem());
         try{
             Connection myConn = DriverManager.getConnection(AccessControl.accountDatabase, "sampleuser", "CodeHaze1");
-            PreparedStatement prepState = myConn.prepareStatement(sql);
+            PreparedStatement prepState = (PreparedStatement) myConn.prepareStatement(sql);
             int key = AccessControl.getRoleKey(cbRole.getSelectedItem().toString().toUpperCase());
             //System.out.println("key: " + key);
-            prepState.setString(1,AES.encrypt(username, key));
-            prepState.setString(2,AES.encrypt(password, key));
+            prepState.setString(1, AES.encrypt(username, key));
+            prepState.setString(2, AES.encrypt(password, key));
             ResultSet myRs = prepState.executeQuery();
             int count = 0;
             while(myRs.next()){
