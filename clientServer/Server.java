@@ -38,21 +38,17 @@ public class Server extends JFrame{
 		setVisible(true);
 	}
 	
-	public void diffieHellman(){
-		try {
-			int tmp = (int) (Math.pow(this.fromClient.readInt(), randNum) % prime);
-			msgArea.append("Key for user " + keys.size() + ": " + tmp + '\n');
-			keys.add(tmp);
-			toClient.writeInt(keys.size() - 1);
-			toClient.writeInt((int) (Math.pow(generator, randNum) % prime));
-			toClient.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void diffieHellman() throws IOException{
+		int tmp = (int) (Math.pow(this.fromClient.readInt(), randNum) % prime);
+		msgArea.append("Key for user " + keys.size() + ": " + tmp + '\n');
+		keys.add(tmp);
+		toClient.writeInt((int) (Math.pow(generator, randNum) % prime));
+		toClient.flush();
 	}
 	
 	public Server(int port) {
 		Random gen = new Random();
+		boolean running = true;
 		this.keys = new ArrayList<>();
 		this.randNum = gen.nextInt(9) + 1;
 		this.prime = 13;
@@ -63,23 +59,21 @@ public class Server extends JFrame{
 			clients = new ArrayList<ClientHandler>();
 			msgArea.append("Waiting for clients...\n");
 			Socket client;
-			while(true) {
+			while(running) {
 				client = server.accept();
 				msgArea.append("Client accepted at port: " + port + '\n');
 				this.fromClient = new DataInputStream(new BufferedInputStream(client.getInputStream()));
 				this.toClient = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
 				ClientHandler handler = new ClientHandler(client, fromClient, toClient);
+				clients.add(handler);
 				msgArea.append("Waiting for key\n");
 				diffieHellman();
 				msgArea.append("Key received\n");
-				clients.add(handler);
 				Thread t = new Thread(handler);
 				t.start();
-				
 			}
-			
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	
@@ -91,7 +85,7 @@ public class Server extends JFrame{
 		
 		private DataInputStream in;
 		private DataOutputStream out;
-		Socket socket;
+		private Socket socket;
 		
 		private ClientHandler(Socket socket, DataInputStream in, DataOutputStream out) {
 			this.in = in;
@@ -99,67 +93,48 @@ public class Server extends JFrame{
 			this.socket = socket;
 		}
 		
-		private void closeClient(int client) {
-			try {
-				clients.get(client).out.writeUTF("exit");//client is still waiting for input after exiting, this closes it
-				clients.get(client).out.flush();
-				wait(20);
-				clients.get(client).socket.close();
-				clients.get(client).out.close();
-				clients.get(client).in.close();
-				keys.set(client, null);
-				clients.set(client, null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		private void closeClient(int client) throws IOException {
+			out.writeUTF("exit");//client is still waiting for input after exiting, this closes it
+			out.flush();
+			socket.close();
+			out.close();
+			in.close();
+			keys.set(client, null);
+			clients.set(client, null);
 		}
 		
-		private String receivedMsg(int id) {
+		private String receivedMsg(int id) throws IOException {
 			String tmp = "", msg = "";
-				try {
-					do {
-						tmp = AES.decrypt(in.readUTF(),keys.get(id)).trim();
-						if(!tmp.equals(".")) {
-							msg += tmp;
-						}
-					}while(!tmp.equals("."));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				do {
+					tmp = AES.decrypt(in.readUTF(),keys.get(id)).trim();
+					if(!tmp.equals(".")) {
+						msg += tmp;
+					}
+				}while(!tmp.equals("."));
 			return msg;
 		}
 		
-		private void sendMsg(int client, String msg) {
-			try {
-				for(int i = 0; i < msg.length(); i = i + 15) {
-					if(i + 15 < msg.length()) {
-						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, i + 15), keys.get(client)));
-					}
-					else {
-						clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, msg.length()), keys.get(client)));
-					}
-					clients.get(client).out.flush();
+		private void sendMsg(int client, String msg) throws IOException {
+			for(int i = 0; i < msg.length(); i = i + 15) {
+				if(i + 15 < msg.length()) {
+					clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, i + 15), keys.get(client)));
 				}
-				clients.get(client).out.writeUTF(AES.encrypt(".", keys.get(client)));
+				else {
+					clients.get(client).out.writeUTF(AES.encrypt(msg.substring(i, msg.length()), keys.get(client)));
+				}
 				clients.get(client).out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			clients.get(client).out.writeUTF(AES.encrypt(".", keys.get(client)));
+			clients.get(client).out.flush();
 		}
 		
-		private int findId() {
-			try {
+		private int findId() throws IOException {
 				String ping = in.readUTF();
 				for(int i = 0; i < keys.size(); i++) {
-					if(AES.decrypt(ping, keys.get(i)).trim().equals("ping")) {
+					if(keys.get(i) != null && AES.decrypt(ping, keys.get(i)).trim().equals("ping")) {
 						return i;
 					}
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			return -1;
 		}
 		
@@ -179,7 +154,7 @@ public class Server extends JFrame{
 						msg = receivedMsg(id);
 						if(hash.equals(String.valueOf(msg.hashCode()))) {
 							msgArea.append(msg + '\n');
-							for(int i = clients.size()-1; i >= 0; i--) {
+							for(int i = 0; i < clients.size(); i++) {
 								if(clients.get(i) != null) {
 									msgArea.append("Sending msg to user " + i + '\n');
 									sendMsg(i, msg);
