@@ -65,7 +65,6 @@ public class ABCFileSystem extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         int retVal;
         String accessiblePath = getAccessiblePath();
-        System.out.println(accessiblePath);
         Object src = e.getSource();
         if (src == btnFind) {
             File fileRoot = new File(accessiblePath);
