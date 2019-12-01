@@ -1,4 +1,4 @@
-package client;
+package finalJar;
 
 import java.awt.*;
 import java.awt.event.*;
