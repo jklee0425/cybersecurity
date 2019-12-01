@@ -1,9 +1,8 @@
 package finalJar;
-import java.sql.Timestamp;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.sql.*;
 import java.util.Date;
+import java.sql.Timestamp;
+import java.sql.*;
+import java.text.*;
 import java.util.ArrayList;
 
 /*
@@ -26,54 +25,76 @@ public class AccessControl {
 
     
     public static String getGrantsUsername(String grantString){
-        return grantString.substring(11,grantString.length());
+        String substring = grantString.substring(11,grantString.length());
+        return substring;
     }
+
     
-    
-    public static void showAllCommands(){
-        System.out.println("SHOWING ALL THE COMMANDS");
+    public static void showAllCommands(String role){
+        if(role.toUpperCase().equals("WAREHOUSE")){
+            System.out.println("listViews");
+            System.out.println("viewData");
+        }else if(role.toUpperCase().equals("SALESPERSON")){
+            System.out.println("listViews");
+            System.out.println("viewData");
+            System.out.println("sell");
+            
+        }else if(role.toUpperCase().equals("CUSTODIAN")){
+            System.out.println("createUser");
+            System.out.println("listUsersByRole");
+            
+            
+        }
+        System.out.print("logOff");
     }
     
     public static boolean createViewCheck(ArrayList<String> listCol, ArrayList<String> aliasCol){
         //if the list are the same size, then it is correct
-        return listCol.size() == aliasCol.size();
+        if(listCol.size() == aliasCol.size()){
+            return true;
+        }
+        return false;
     }
     
-    public static int getRoleID(String rolename){
+    public static int returnRoleID(String rolename){
+        
+       
+      
         if(rolename.equals("WAREHOUSE")){
+            
             return 100;
         } else if(rolename.equals("SALESPERSON")){
             return 101;
         }
         return -1;
     }
-
-    public static String getRoleName(int roleID){
-        return roleID == 100 ? roleArray[0] : roleID == 101 ? roleArray[1] : "";
-    }
+    
     public static int getRoleKey(String rolename){
         Connection keyConn;
         try{
-            keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
-            String sql = "SELECT key_val FROM roles WHERE role_name = ?";
-            PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
-            preparedStatement.setString(1,rolename);
-            ResultSet myRs = preparedStatement.executeQuery();
-            
-            int id = -1;
-            while(myRs.next()){
-                id = myRs.getInt("key_val");
-            }
-            if(id == -1){
-                System.out.println("Login Server is down");
-            }
-            keyConn.close();
-            return id;
+        keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+        String sql = "SELECT key_val FROM roles WHERE role_name = ?";
+        PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+        preparedStatement.setString(1,rolename);
+        ResultSet myRs = preparedStatement.executeQuery();
+       
+        int id = -1;
+        while(myRs.next()){
+            id = myRs.getInt("key_val");
+        }
+        if(id == -1){
+            System.out.println("Login Server is down");
+        }
+         keyConn.close();
+        return id;
         }catch(SQLException e){
             System.out.println("Failed to get roles");
             e.printStackTrace();
             System.exit(0);
         }
+        
+       
+        
         return -1;
     }
     public static boolean validRole(String rolename){
@@ -85,72 +106,116 @@ public class AccessControl {
         }
         return false;
     }
-    public static void logger(String name, String log) {
+    
+    public static boolean isAllowed(String rolename, String branch){
+       
         Connection keyConn;
-        try {
-            keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
-            PreparedStatement ps = keyConn.prepareStatement("INSERT into Logs (username, time, log) VALUES (?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, name);
-            ps.setTimestamp(2, new Timestamp(new Date().getTime()));
-            ps.setString(3, log);
-            ps.executeUpdate();
-            keyConn.close();
+        try{
+        keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+        String sql = "SELECT now()";
+        PreparedStatement preparedStatement = keyConn.prepareStatement(sql);
+        ResultSet myRs = preparedStatement.executeQuery();
+        String time = "";
+        while(myRs.next()){
+            //System.out.println("RUN");
+            time = (String)myRs.getString("now()").substring(11,13);
+        }
+          int intTime = Integer.parseInt(time);
+        if(rolename.toUpperCase() == "WAREHOUSE"){
+            
+              return true;
+        }else if(rolename.toUpperCase() == "SALESPERSON"){
+            //open from 8 to 5;
+            int lowerBound = 0;
+            int upperBound = 0;
+            if(branch.toUpperCase().equals("VANCOUVER")){
+                lowerBound = 8;
+                upperBound = 17; 
+            if(intTime > lowerBound && intTime < upperBound){
+                keyConn.close();
+                return true;
+            }else{
+                keyConn.close();
+                return false;
+            }
+            }else if(branch.toUpperCase().equals("GERMANY")){
+               
+             //11pm in van is 8 am ger
+            
+             //8 am in van is 5 pm ger
+             //between 11 and 8
+             //between 23 and 08
+             lowerBound = 23;
+             upperBound = 8;
+             //if the time is between 23 and 08, then they are open
+             //if the number is less than 23, can't access
+             //if the number is greater than 08, can't access
+             
+             if(intTime > lowerBound || intTime < upperBound){
+                 keyConn.close();
+                 return true;
+             }else{
+                keyConn.close();
+                 return false;
+             }
+             
+             
+                
+            } else if(branch.replaceAll(" ","_").toUpperCase().equals("NEW_YORK")){
+                
+                //8 am in van is 11am in new york
+                //5pm in van is 8pm in new york
+                //5am in van is 8 am in newyork
+                //2pm in van is 5pm in newyork
+                lowerBound = 5;
+                upperBound = 14;
+                if(intTime < lowerBound && intTime > upperBound){
+                    keyConn.close();
+                    return true;
+                }else{
+                    keyConn.close();
+                    return false;
+                }
+                
+            }
+            
+
+            
+        }
         }catch(SQLException e){
-            System.out.println("logger error");
+            System.out.println("Failed to get roles");
             e.printStackTrace();
+            System.exit(0);
         }
+ 
+        
+        return false;
     }
-
-    public static void getLogs() {
-        try {
-            Connection conn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Logs");
-            FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\ABCFS\\logs.txt");
-            BufferedWriter bw = new BufferedWriter(fw);
-            while (rs.next()) {
-                try {
-                    for (int i = 1; i <= 3; i++) {
-                        bw.write(String.valueOf(rs.getString(i)));
-                    }
-                    bw.newLine();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            bw.close();
-            st.close();
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    
+    public static boolean validBranch(String branchName){
+        String formattedString = branchName.replaceAll(" ", "_").toUpperCase();
+        if(formattedString.equals("VANCOUVER") || formattedString.equals("NEW_YORK")|| formattedString.equals("GERMANY")){
+            return true;
         }
+        return false;
     }
-
-    public static void getLogs(String username) {
-        try {
-            Connection conn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
-            String sql = "SELECT * FROM Logs WHERE username = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ResultSet rs = ps.executeQuery();
-            FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\ABCFS\\logs.txt");
-            BufferedWriter bw = new BufferedWriter(fw);
-            while (rs.next()) {
-                try {
-                    for (int i = 1; i <= 3; i++) {
-                        bw.write(String.valueOf(rs.getString(i)));
-                    }
-                    bw.newLine();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            bw.close();
-            ps.close();
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    
+    public static void generateLog(String name, String action){
+    Connection keyConn;
+    try{
+        keyConn = DriverManager.getConnection(AccessControl.loginDatabase,"sampleuser","CodeHaze1");
+        String sql = "INSERT into Logs(username,action,date) VALUES (?,?,?)";
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        PreparedStatement statement = keyConn.prepareStatement(sql);
+        statement.setString(1,name);
+        statement.setString(2, action);
+        statement.setString(3,timeStamp);
+        statement.executeUpdate();
+        keyConn.close();
+    }catch(SQLException e){
+        e.printStackTrace();
+        System.out.println("Log error");
     }
+    }
+ 
 }
