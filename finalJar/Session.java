@@ -97,14 +97,14 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
                 list.setSelectedIndex(index);
                 list.ensureIndexIsVisible(index);
                 int chatroomIndex = index + CHATROOM_PORT;
-                AccessControl.logger(username, " has entered chatroom " + chatroomIndex + ".");
+                AccessControl.generateLog(username, " Entered chatroom " + chatroomIndex + ".");
                 new ChatRoom(chatroomIndex, username);
             }
         } else if (e.getSource() == btnAccess) {
-            AccessControl.logger(username, " has accessed file system.");
+            AccessControl.logger(username, " Accessed file system.");
             new ABCFileSystem(branch, role);
         } else if (e.getSource() == btnLogOut) {
-            AccessControl.logger(username, " has signed out.");
+            AccessControl.logger(username, " Signed out.");
             System.exit(0);
         }
     }
