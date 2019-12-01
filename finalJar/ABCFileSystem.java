@@ -59,11 +59,12 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         this.userBranch = branch;
         fc = new JFileChooser();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         int retVal;
-        String accessiblePath = System.getProperty("user.dir") + "\\ABCFS" + userBranch + userRole;
+        String accessiblePath = getAccessiblePath();
+        System.out.println(accessiblePath);
         Object src = e.getSource();
         if (src == btnFind) {
             File fileRoot = new File(accessiblePath);
@@ -100,7 +101,13 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             }
         }
     }
+    private String getAccessiblePath(){
+        String path = System.getProperty("user.dir") + "\\ABCFS";
+        if (!userRole.equalsIgnoreCase(("Custodian")))
+            path += "\\" + userBranch + "\\" + userRole;
+        return path;
+    }
     public static void main(String[] args) {
-        new ABCFileSystem("", "Sales");
+        new ABCFileSystem("Vancouver", "custodian");
     }
 }
