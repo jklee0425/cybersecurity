@@ -126,9 +126,8 @@ public class Login extends JFrame implements ActionListener{
             System.out.println(prepState);
         }catch(SQLException f){
             f.printStackTrace();
-            
             System.out.println("Wrong password");
-        return false;
+            return false;
         }
         
         return false;
