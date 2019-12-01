@@ -32,14 +32,14 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
         this.role = AccessControl.getRoleName(roleID);
         this.branch = branch;
         JPanel userInfoPn = new JPanel();
-        lbUserInfo = new JLabel("Logged in as " + username);
+        lbUserInfo = new JLabel("Logged in as " + username + " (" + role + ", " + branch + ")");
         btnLogOut = new JButton("Sign Out");
         btnLogOut.addActionListener(this);
         userInfoPn.setLayout(new BorderLayout());
         userInfoPn.add(lbUserInfo, BorderLayout.LINE_START);
         userInfoPn.add(btnLogOut, BorderLayout.LINE_END);
         chatRoomList = new DefaultListModel();
-        for (int i = 8081; i < 8091; i++) {
+        for (int i = CHATROOM_PORT; i < CHATROOM_PORT + 9; i++) {
             chatRoomList.addElement("Chatroom port: " + i);
         }
         list = new JList(chatRoomList);

@@ -2,6 +2,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ChatRoom",
+            "request": "launch",
+            "mainClass": "finalJar.ChatRoom",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Server",
+            "request": "launch",
+            "mainClass": "finalJar.Server",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ABCFileSystem",
+            "request": "launch",
+            "mainClass": "finalJar.ABCFileSystem",
+            "projectName": "cybersecurity_8a1749f8"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Session",
             "request": "launch",
             "mainClass": "finalJar.Session",

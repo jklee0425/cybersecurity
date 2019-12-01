@@ -56,7 +56,7 @@ public class Helper {
      * @throws InvalidKeySpecException
      * @see https://www.baeldung.com/java-password-hashing
      */
-    public static byte[] hashPassword(String pw) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] hashPBKDF2(String pw) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);

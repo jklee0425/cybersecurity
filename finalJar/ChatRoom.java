@@ -22,7 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
-//import clientServer.AES.*;
 public class ChatRoom extends JFrame {
 	// @summary Creates a client for a chatroom
 
@@ -38,10 +37,7 @@ public class ChatRoom extends JFrame {
 	private boolean runnable = true;
 	
 	public void buildGUI() {
-		final int FRAME_WIDTH = 700;
-		final int FRAME_HEIGHT = 200;
-		
-	JPanel panel = new JPanel();
+		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Message: ");
 
 		msgField = new JTextField("");
@@ -59,7 +55,7 @@ public class ChatRoom extends JFrame {
 		createMenuBar();
 
 		setTitle("Chatroom client");
-		setSize(FRAME_WIDTH, FRAME_HEIGHT);
+		setSize(Helper.FRAME_WIDTH, Helper.FRAME_HEIGHT);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
@@ -95,7 +91,6 @@ public class ChatRoom extends JFrame {
 						socket.close();
 						toServer.close();
 						fromServer.close();
-						System.exit(0);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -194,6 +189,6 @@ public class ChatRoom extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		//new ChatRoom(8081, "User");
+		new ChatRoom(8081, "User");
 	}
 }

@@ -59,9 +59,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         this.userBranch = branch;
         fc = new JFileChooser();
     }
-    public static void main(String[] args) {
-        new ABCFileSystem("", "Sales");
-    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         int retVal;
@@ -101,5 +99,8 @@ public class ABCFileSystem extends JFrame implements ActionListener {
                 e1.printStackTrace();
             }
         }
+    }
+    public static void main(String[] args) {
+        new ABCFileSystem("", "Sales");
     }
 }

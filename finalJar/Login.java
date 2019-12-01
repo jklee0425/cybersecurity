@@ -5,9 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
 import java.time.LocalTime;
 
 import javax.swing.BoxLayout;
@@ -19,8 +19,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-
-import org.graalvm.compiler.nodes.memory.Access;
 
 public class Login extends JFrame implements ActionListener{
     private final String[] ROLES = {"Salesperson", "Warehouse"};
@@ -37,10 +35,11 @@ public class Login extends JFrame implements ActionListener{
         JPanel idPanel = new JPanel();
         lbUsername = new JLabel(Helper.LABELS[0]);
         tfUsername = new JTextField(Helper.INPUT_LENGTH);
+
+        cbRole = new JComboBox<String>(ROLES);
         JPanel pwPanel = new JPanel();
         lbPassword = new JLabel(Helper.LABELS[1]);
         pfPassword = new JPasswordField(Helper.INPUT_LENGTH);
-        cbRole = new JComboBox<String>(ROLES);
 
         idPanel.add(lbUsername);
         idPanel.add(tfUsername);
@@ -51,10 +50,10 @@ public class Login extends JFrame implements ActionListener{
         userInputPanel.add(idPanel);
         userInputPanel.add(pwPanel);
         userInputPanel.add(cbRole);
+
         JPanel btnPanel = new JPanel();
         btnLogin = new JButton("Log in");
         btnLogin.addActionListener(this);
-
         btnPanel.add(btnLogin);
 
         setLayout(new BorderLayout());
@@ -63,14 +62,14 @@ public class Login extends JFrame implements ActionListener{
 
         pack();
         setTitle("ABC Airlines");
-        setSize(Helper.FRAME_WIDTH, Helper.FRAME_HEIGHT);
+        setSize(350, 180);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
+
     public void actionPerformed(ActionEvent e) {
         String roleName = cbRole.getSelectedItem().toString().toUpperCase();
         String name = Helper.getUsername(tfUsername);
-        String branch = AccessControl.getBranchName(name);
         role = AccessControl.getRoleID(roleName);
         /**
          * TODO 
@@ -106,7 +105,6 @@ public class Login extends JFrame implements ActionListener{
     private boolean authenticate(String username, String password) {
         // TODO; Example
         String sql = "SELECT userName,branch FROM userInfo WHERE userName=? and userPass=?";
-        //System.out.println("ROLE SELECTED IS: " + cbRole.getSelectedItem());
         try{
             Connection myConn = DriverManager.getConnection(AccessControl.accountDatabase, "sampleuser", "CodeHaze1");
             PreparedStatement prepState = (PreparedStatement) myConn.prepareStatement(sql);
@@ -117,7 +115,7 @@ public class Login extends JFrame implements ActionListener{
             ResultSet myRs = prepState.executeQuery();
             int count = 0;
             while(myRs.next()){
-                branch = myRs.getString("branch");
+                this.branch = myRs.getString("branch");
                 count++;
             }
             if(count == 1){

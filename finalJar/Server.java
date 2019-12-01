@@ -83,7 +83,7 @@ public class Server extends JFrame{
 	}
 	
 	public static void main(String[] args) {
-		new Server(8081);
+		new Server(8085);
 	}
 	
 	class ClientHandler implements Runnable{
