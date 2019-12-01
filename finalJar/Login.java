@@ -86,27 +86,14 @@ public class Login extends JFrame implements ActionListener{
          */ 
         if(authenticate(name, Helper.getPassword(pfPassword),branch) && Database.AccessControl.isAllowed(name,branch)){
             dispose();
-            AccessControl.logger(name, " has logged in.");
+            AccessControl.generateLog(name, "Succesful Login");
             new Session(name, role, branch);
         }else{
             JOptionPane.showMessageDialog(null, "Password is wrong / Accessing after hours");
+            AccessControl.generateLog(name,"Login Attempt");
         }
     }
-    /**
-     * This method retrieves accessible time of the user from the database
-     * and returns boolean according to the retrieved value and the current time
-     * @param username ID
-     * @return boolean
-     */
-    private boolean isAllowed(String username){
-        // Retrieve allowed time for the user in the system.
-        String[] accessibleTime = { "15:30", "14:40" }; // example
-        LocalTime now = LocalTime.now();
-        // return now.isAfter(LocalTime.parse(accessibleTime[0])) && 
-        //     now.isBefore(LocalTime.parse(accessibleTime[1]));
-        return true;
-    }
-    /**
+
      * Check if the pw matches the username
      * @param username  id to check from the database
      * @param pw        password to compare
@@ -127,7 +114,7 @@ public class Login extends JFrame implements ActionListener{
             ResultSet myRs = prepState.executeQuery();
             int count = 0;
             while(myRs.next()){
-                //branch = myRs.getString("branch");
+               
                 count++;
             }
             if(count == 1){
