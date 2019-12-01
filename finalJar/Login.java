@@ -1,4 +1,4 @@
-package loginSessionControl;
+package finalJar;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -41,8 +41,6 @@ public class Login extends JFrame implements ActionListener{
         lbPassword = new JLabel(Helper.LABELS[1]);
         pfPassword = new JPasswordField(Helper.INPUT_LENGTH);
         cbRole = new JComboBox<String>(ROLES);
-        cbRole.addActionListener(this);
-
 
         idPanel.add(lbUsername);
         idPanel.add(tfUsername);
@@ -70,21 +68,18 @@ public class Login extends JFrame implements ActionListener{
         setVisible(true);
     }
     public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
-        if(src == btnLogin) {
-            String roleName = cbRole.getSelectedItem().toString();
-            String name = Helper.getUsername(tfUsername);
-            int role = Database.AccessControl.getRoleKey(roleName);
-            /**
-             * TODO 
-             * - include sanity check with Database.AccessControl.getRoleKey
-             * - retrieve branch name from the userinput and pass it down to Session as a parameter
-             */ 
-            if(authenticate(name, Helper.getPassword(pfPassword)) && isAllowed(name)){
-                dispose();
-                new client.Session(name, role, "");
-            }
-        }else if(src == cbRole){
+        String roleName = cbRole.getSelectedItem().toString();
+        String name = Helper.getUsername(tfUsername);
+        int role = Database.AccessControl.getRoleKey(roleName);
+        /**
+         * TODO 
+         * - include sanity check with Database.AccessControl.getRoleKey
+         * - retrieve branch name from the userinput and pass it down to Session as a parameter
+         */ 
+        if(authenticate(name, Helper.getPassword(pfPassword)) && isAllowed(name)){
+            dispose();
+            new client.Session(name, role, "");
+        }else{
             
         }
     }
