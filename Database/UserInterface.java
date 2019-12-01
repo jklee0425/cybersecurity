@@ -1,4 +1,4 @@
-
+package Database;
 import java.sql.SQLException;
 
 public interface UserInterface {

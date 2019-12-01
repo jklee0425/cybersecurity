@@ -1,7 +1,8 @@
+package Database;
 
 import java.sql.*;
 import java.util.ArrayList;
-
+import clientServer.AES;
 
 public class Warehouse {
     private String role = "WAREHOUSE";
@@ -73,46 +74,43 @@ public class Warehouse {
 
 
     public void listViews(){
-    String sql = "SHOW FULL TABLES IN Inventory WHERE TABLE_TYPE LIKE 'VIEW'";
-    
-    try{
-        PreparedStatement preparedStatement = myConn.prepareStatement(sql); 
-        myRs = preparedStatement.executeQuery();
-        System.out.println("Available Views");
-        while(myRs.next()){
-            System.out.println("        " + myRs.getString("Tables_in_Inventory"));
+        String sql = "SHOW FULL TABLES IN Inventory WHERE TABLE_TYPE LIKE 'VIEW'";
+        
+        try{
+            PreparedStatement preparedStatement = myConn.prepareStatement(sql); 
+            myRs = preparedStatement.executeQuery();
+            System.out.println("Available Views");
+            while(myRs.next()){
+                System.out.println("        " + myRs.getString("Tables_in_Inventory"));
+            }
+        }catch(SQLException e){
+            System.out.println("Views are unavailable");
         }
-    }catch(SQLException e){
-        System.out.println("Views are unavailable");
     }
-  }
     
     public void viewData(String input){
         System.out.println(input);
-    try{
-        String sql = "SELECT * FROM "+ input;
-      
-        myStmt = myConn.createStatement();
-        myRs = myStmt.executeQuery(sql);
-        System.out.println("Name:Brand:Year:Stock");
-        while(myRs.next()){
-            String name = myRs.getString("Plane Name");
-            String brand = myRs.getString("Brand");
-            int year = myRs.getInt("Year");
-            int stock = myRs.getInt("Stock");
-            System.out.println(name + ":" + brand +":"+year+":"+stock);
+        try{
+            String sql = "SELECT * FROM "+ input;
+        
+            myStmt = myConn.createStatement();
+            myRs = myStmt.executeQuery(sql);
+            System.out.println("Name:Brand:Year:Stock");
+            while(myRs.next()){
+                String name = myRs.getString("Plane Name");
+                String brand = myRs.getString("Brand");
+                int year = myRs.getInt("Year");
+                int stock = myRs.getInt("Stock");
+                System.out.println(name + ":" + brand +":"+year+":"+stock);
+            }
+        }catch(SQLException e){
+            System.out.println("SELECTING FROM VIEW ERROR");
+            e.printStackTrace();
+            System.exit(0);
         }
-    }catch(SQLException e){
-        System.out.println("SELECTING FROM VIEW ERROR");
-        e.printStackTrace();
-        System.exit(0);
-    }
-    
-    
     }
     
     private void assignKey(){
-        
         try{
         Connection keyConn = DriverManager.getConnection(AccessControl.loginDatabase, dbEmp, dbPass);
         String sql = "SELECT key_val FROM roles WHERE role_name = ?";
@@ -128,17 +126,6 @@ public class Warehouse {
         }catch(SQLException e){
             e.printStackTrace();
             System.out.println("FATAL ERROR");
-            
-    }
-        
-       
-    }
-
-
-
- 
-    
-  
- 
-    
+        }
+    }   
 }

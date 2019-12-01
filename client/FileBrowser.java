@@ -18,14 +18,23 @@ public class FileBrowser extends JFrame implements TreeSelectionListener {
     private static final long serialVersionUID = 1L;
 
     private DefaultMutableTreeNode root;
-
     private DefaultTreeModel treeModel;
-
     private JTree tree;
+    private String userRank, userBranch; // 302 sales, 101 warehouse
+    private String perm;
 
-    public FileBrowser() {
-        File fileRoot = new File(System.getProperty("user.dir") + "\\cybersecurity\\ABCFS");
-        System.out.println((System.getProperty("user.dir") + "\\ABCFS"));
+    public FileBrowser(int rank, String branch) {
+        if (rank == 101) {
+            userRank = "Warehouse";
+        } else if (rank == 302) {
+            userRank = "Sales";
+        } else {
+            userRank = "";
+        }
+        perm = userRank == "" ? "w" : "r";
+        userBranch = branch;
+
+        File fileRoot = new File(System.getProperty("user.dir") + "\\cybersecurity\\ABCFS" + branch + userRank);
         root = new DefaultMutableTreeNode(new FileNode(fileRoot));
         treeModel = new DefaultTreeModel(root);
 
@@ -46,7 +55,7 @@ public class FileBrowser extends JFrame implements TreeSelectionListener {
     }
 
     public static void main(String[] args) {
-        new FileBrowser();
+        new FileBrowser(0, "");
     }
 
     private class CreateChildNodes implements Runnable {
@@ -67,12 +76,6 @@ public class FileBrowser extends JFrame implements TreeSelectionListener {
 
         private void createChildren(File fileRoot, DefaultMutableTreeNode node) {
             File[] files = fileRoot.listFiles();
-            System.out.println(fileRoot.isDirectory());
-            System.out.println(fileRoot.canRead());
-            System.out.println(fileRoot.exists());
-            for (File f : files) {
-                System.out.println(f.toString());
-            }
             if (files != null) {
                 for (File file : files) {
                     DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new FileNode(file));
@@ -108,8 +111,7 @@ public class FileBrowser extends JFrame implements TreeSelectionListener {
 
         Object nodeInfo = node.getUserObject();
         if (node.isLeaf()){
-            
+            System.out.println(nodeInfo.toString());
         }
-
     }
 }

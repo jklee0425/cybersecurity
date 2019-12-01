@@ -5,7 +5,28 @@
             "name": "CodeLens (Launch) - FileBrowser",
             "request": "launch",
             "mainClass": "client.FileBrowser",
-            "projectName": "cybersecurity_8a1749f8"
+            "projectName": "cybersecurity_f63b5302"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Session",
+            "request": "launch",
+            "mainClass": "client.Session",
+            "projectName": "cybersecurity_f63b5302"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ChatRoom",
+            "request": "launch",
+            "mainClass": "client.ChatRoom",
+            "projectName": "cybersecurity_f63b5302"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ABCFileSystem",
+            "request": "launch",
+            "mainClass": "client.ABCFileSystem",
+            "projectName": "cybersecurity_f63b5302"
         },
         {
             "type": "java",

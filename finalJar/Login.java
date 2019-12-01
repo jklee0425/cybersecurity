@@ -1,4 +1,4 @@
-//package loginSessionControl;
+package finalJar;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;

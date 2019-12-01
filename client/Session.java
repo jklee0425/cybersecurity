@@ -98,7 +98,7 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
                 new client.ChatRoom(index + CHATROOM_PORT, username);
             }
         } else if (e.getSource() == btnAccess) {
-            new ABCFileSystem();
+            new ABCFileSystem("", 0);
         } else if (e.getSource() == btnLogOut) {
             System.exit(0);
         }

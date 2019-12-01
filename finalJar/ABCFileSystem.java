@@ -1,4 +1,4 @@
-package client;
+package finalJar;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,66 +16,90 @@ public class ABCFileSystem extends JFrame implements ActionListener {
     JFileChooser fc;
     JButton btnFind;
     JButton btnChoose;
-    JLabel lbFind;
-    JLabel lbFile;
+    JButton btnSave;
     JButton btnUpload;
+    JLabel lbFile;
+    private String userRank, userBranch;
 
     public void buildGUI() {
         setLayout(new BorderLayout());
-        JPanel inputPanel = new JPanel();
-        
-        lbFind = new JLabel();
-        btnFind = new JButton("Find");
-        btnFind.addActionListener(this);
-        inputPanel.add(lbFind);
-        inputPanel.add(btnFind);
+        JPanel filePanel = new JPanel();
+        JPanel lbPanel = new JPanel();
+        JPanel actionPanel = new JPanel();
 
-        JPanel btnPanel = new JPanel();
-        btnChoose = new JButton("Choose");
-        lbFile = new JLabel("Choose a file to upload...");
+        btnFind = new JButton("Find a file from FS");
+        btnChoose = new JButton("Select a file to upload");
+        btnSave = new JButton("Download");
         btnUpload = new JButton("Upload");
+        btnFind.addActionListener(this);
         btnChoose.addActionListener(this);
+        btnSave.addActionListener(this);
         btnUpload.addActionListener(this);
-        btnPanel.add(btnChoose);
-        btnPanel.add(lbFile);
-        btnPanel.add(btnUpload);
+        filePanel.add(btnFind);
+        filePanel.add(btnChoose);
+        lbFile = new JLabel("...");
+        lbPanel.add(lbFile);
+        actionPanel.add(btnSave);
+        actionPanel.add(btnUpload);
+        
 
         setLayout(new BorderLayout());
-        add(inputPanel, BorderLayout.PAGE_START);
-        add(btnPanel, BorderLayout.CENTER);
+        add(filePanel, BorderLayout.PAGE_START);
+        add(lbPanel, BorderLayout.CENTER);
+        add(actionPanel, BorderLayout.PAGE_END);
         setTitle("ABC Airlines File System");
-        setSize(700, 200);
+        setSize(400, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    public ABCFileSystem() {
+    public ABCFileSystem(String branch, int rank) {
         buildGUI();
+        userRank = rank == 101 ? "Warehouse" : rank == 302 ? "Sales" : "";
+        userBranch = branch;
         fc = new JFileChooser();
     }
     public static void main(String[] args) {
-        new ABCFileSystem();
+        new ABCFileSystem("", 0);
     }
     @Override
     public void actionPerformed(ActionEvent e) {
         int retVal;
-        if (e.getSource() == btnFind) {
-            new FileBrowser();
-            // TODO
-        } else if (e.getSource() == btnChoose) {
-            retVal = fc.showDialog(ABCFileSystem.this, "Choose");
+        String accessiblePath = System.getProperty("user.dir") + "\\ABCFS" + userBranch + userRank;
+        Object src = e.getSource();
+        if (src == btnFind) {
+            File fileRoot = new File(accessiblePath);
+            fc.setCurrentDirectory(fileRoot);
+            if (fc.getComponentCount() == 4) fc.remove(0);
+            retVal = fc.showDialog(ABCFileSystem.this, "Open");
             if (retVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lbFile.setText(file.getName());
             }
-        } else if (e.getSource() == btnUpload) {
-            // TODO
+        } else if (src == btnChoose) {
+            fc = new JFileChooser();
+            fc.setCurrentDirectory(new File(System.getProperty("user.home") + "\\Documents"));
+            retVal = fc.showDialog(ABCFileSystem.this, "Save");
+            if (retVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lbFile.setText(file.getName());
+            }
+        } else if (src == btnUpload) {
             File file = fc.getSelectedFile();
-            Path path = Paths.get(System.getProperty("user.dir") + "\\");
-            // Files.copy(file, path.resolve(file.getName()));
+            Path path = Paths.get(accessiblePath);
+            try {
+                Files.copy(file.toPath(), path.resolve(file.getName()));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        } else if (src == btnSave) {
+            File file = fc.getSelectedFile();
+            Path path = Paths.get(System.getProperty("user.home") + "\\Downloads");
+            try {
+                Files.copy(file.toPath(), path.resolve(file.getName()));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
-    }
-    public void log(){
-        
     }
 }

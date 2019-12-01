@@ -3,6 +3,11 @@ package loginSessionControl;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.time.LocalTime;
 
 import javax.swing.BoxLayout;
@@ -13,6 +18,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import Database.AccessControl;
+import clientServer.AES;
 
 public class Login extends JFrame implements ActionListener{
     /**
@@ -95,10 +103,35 @@ public class Login extends JFrame implements ActionListener{
      * @param pw        password to compare
      * @return return true if the password matches the username, otherwise false.
      */
-    private boolean authenticate(String username, byte[] pw) {
+    private boolean authenticate(String username, String password) {
         // TODO; Example
-        String sql = "SELECT pwHash FROM users WHERE username=" + username;
-        return true;//sql.execute().eqauls(pw);
+        String sql = "SELECT userName FROM userInfo WHERE userName=? and userPass=?";
+        //System.out.println("ROLE SELECTED IS: " + cbRole.getSelectedItem());
+        try{
+            Connection myConn = DriverManager.getConnection(AccessControl.accountDatabase, "sampleuser", "CodeHaze1");
+            PreparedStatement prepState = (PreparedStatement) myConn.prepareStatement(sql);
+            int key = AccessControl.getRoleKey(cbRole.getSelectedItem().toString().toUpperCase());
+            //System.out.println("key: " + key);
+            prepState.setString(1, AES.encrypt(username, key));
+            prepState.setString(2, AES.encrypt(password, key));
+            ResultSet myRs = prepState.executeQuery();
+            int count = 0;
+            while(myRs.next()){
+                count++;
+            }
+            if(count == 1){
+                myConn.close();
+                return true;
+            }
+            System.out.println(prepState);
+        }catch(SQLException f){
+            f.printStackTrace();
+            
+            System.out.println("Wrong password");
+        return false;
+        }
+        
+        return false;
     }
     public static void main(String[] args) {
         new Login();

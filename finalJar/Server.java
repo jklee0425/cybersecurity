@@ -1,4 +1,4 @@
-//package clientServer;
+package finalJar;
 
 import java.awt.BorderLayout;
 import java.io.BufferedInputStream;
