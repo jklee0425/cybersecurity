@@ -3,7 +3,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.*;
 
 import javax.swing.JButton;
@@ -20,7 +19,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
     JButton btnSave;
     JButton btnUpload;
     JLabel lbFile;
-    private String userRole, userBranch;
+    private String userName, userRole, userBranch;
 
     public void buildGUI() {
         setLayout(new BorderLayout());
@@ -54,8 +53,9 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    public ABCFileSystem(String branch, String role) {
+    public ABCFileSystem(String name, String branch, String role) {
         buildGUI();
+        this.userName = name;
         this.userRole = role;
         this.userBranch = branch;
         fc = new JFileChooser();
@@ -88,6 +88,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             Path path = Paths.get(accessiblePath);
             try {
                 Files.copy(file.toPath(), path.resolve(file.getName()));
+                AccessControl.logger(userName, " has uploaded a file: " + file.getName());
             } catch (Exception e1) {
                 showMessageDialog(null, "Please select a file");
             }
@@ -96,6 +97,7 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             Path path = Paths.get(System.getProperty("user.home") + "\\Downloads");
             try {
                 Files.copy(file.toPath(), path.resolve(file.getName()));
+                AccessControl.logger(userName, " has downloaded a file: " + file.getName());
             } catch (Exception e1) {
                 showMessageDialog(null, "Please select a file");
             }
@@ -108,6 +110,6 @@ public class ABCFileSystem extends JFrame implements ActionListener {
         return path;
     }
     public static void main(String[] args) {
-        new ABCFileSystem("Vancouver", "custodian");
+        new ABCFileSystem("user", "Vancouver", "custodian");
     }
 }

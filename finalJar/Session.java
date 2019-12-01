@@ -96,11 +96,15 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
             } else { //Select an index.
                 list.setSelectedIndex(index);
                 list.ensureIndexIsVisible(index);
-                new ChatRoom(index + CHATROOM_PORT, username);
+                int chatroomIndex = index + CHATROOM_PORT;
+                AccessControl.logger(username, " has entered chatroom " + chatroomIndex + ".");
+                new ChatRoom(chatroomIndex, username);
             }
         } else if (e.getSource() == btnAccess) {
+            AccessControl.logger(username, " has accessed file system.");
             new ABCFileSystem(branch, role);
         } else if (e.getSource() == btnLogOut) {
+            AccessControl.logger(username, " has signed out.");
             System.exit(0);
         }
     }

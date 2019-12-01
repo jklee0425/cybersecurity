@@ -1,5 +1,9 @@
 package finalJar;
+import java.sql.Timestamp;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.sql.*;
+import java.util.Date;
 import java.util.ArrayList;
 
 /*
@@ -22,8 +26,7 @@ public class AccessControl {
 
     
     public static String getGrantsUsername(String grantString){
-        String substring = grantString.substring(11,grantString.length());
-        return substring;
+        return grantString.substring(11,grantString.length());
     }
     
     
@@ -33,10 +36,7 @@ public class AccessControl {
     
     public static boolean createViewCheck(ArrayList<String> listCol, ArrayList<String> aliasCol){
         //if the list are the same size, then it is correct
-        if(listCol.size() == aliasCol.size()){
-            return true;
-        }
-        return false;
+        return listCol.size() == aliasCol.size();
     }
     
     public static int getRoleID(String rolename){
@@ -85,5 +85,72 @@ public class AccessControl {
         }
         return false;
     }
- 
+    public static void logger(String name, String log) {
+        Connection keyConn;
+        try {
+            keyConn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+            PreparedStatement ps = keyConn.prepareStatement("INSERT into Logs (username, time, log) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, name);
+            ps.setTimestamp(2, new Timestamp(new Date().getTime()));
+            ps.setString(3, log);
+            ps.executeUpdate();
+            keyConn.close();
+        }catch(SQLException e){
+            System.out.println("logger error");
+            e.printStackTrace();
+        }
+    }
+
+    public static void getLogs() {
+        try {
+            Connection conn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM Logs");
+            FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\ABCFS\\logs.txt");
+            BufferedWriter bw = new BufferedWriter(fw);
+            while (rs.next()) {
+                try {
+                    for (int i = 1; i <= 3; i++) {
+                        bw.write(String.valueOf(rs.getString(i)));
+                    }
+                    bw.newLine();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            bw.close();
+            st.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void getLogs(String username) {
+        try {
+            Connection conn = DriverManager.getConnection(AccessControl.loginDatabase, "sampleuser", "CodeHaze1");
+            String sql = "SELECT * FROM Logs WHERE username = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\ABCFS\\logs.txt");
+            BufferedWriter bw = new BufferedWriter(fw);
+            while (rs.next()) {
+                try {
+                    for (int i = 1; i <= 3; i++) {
+                        bw.write(String.valueOf(rs.getString(i)));
+                    }
+                    bw.newLine();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            bw.close();
+            ps.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

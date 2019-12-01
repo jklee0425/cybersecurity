@@ -20,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.graalvm.compiler.nodes.memory.Access;
+
 import Database.AccessControl;
 import clientServer.AES;
 import client.Session;
@@ -34,8 +36,6 @@ public class Login extends JFrame implements ActionListener{
     private JLabel lbUsername;
     private JLabel lbPassword;
     private JButton btnLogin;
-    private String role;
-    private String branch;
     public Login() {
         JPanel userInputPanel = new JPanel();
         JPanel idPanel = new JPanel();
@@ -86,6 +86,7 @@ public class Login extends JFrame implements ActionListener{
          */ 
         if(authenticate(name, Helper.getPassword(pfPassword),branch) && Database.AccessControl.isAllowed(name,branch)){
             dispose();
+            AccessControl.logger(name, " has logged in.");
             new Session(name, role, branch);
         }else{
             JOptionPane.showMessageDialog(null, "Password is wrong / Accessing after hours");
