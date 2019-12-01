@@ -95,7 +95,7 @@ public class Session extends JFrame implements ListSelectionListener, ActionList
             } else { //Select an index.
                 list.setSelectedIndex(index);
                 list.ensureIndexIsVisible(index);
-                new client.ChatRoom(index + CHATROOM_PORT, username);
+                new ChatRoom(index + CHATROOM_PORT, username);
             }
         } else if (e.getSource() == btnAccess) {
             new ABCFileSystem("", 0);
