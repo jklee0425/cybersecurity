@@ -11,6 +11,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import static javax.swing.JOptionPane.showMessageDialog;
 
 public class ABCFileSystem extends JFrame implements ActionListener {
     JFileChooser fc;
@@ -88,16 +89,16 @@ public class ABCFileSystem extends JFrame implements ActionListener {
             Path path = Paths.get(accessiblePath);
             try {
                 Files.copy(file.toPath(), path.resolve(file.getName()));
-            } catch (IOException e1) {
-                e1.printStackTrace();
+            } catch (Exception e1) {
+                showMessageDialog(null, "Please select a file");
             }
         } else if (src == btnSave) {
             File file = fc.getSelectedFile();
             Path path = Paths.get(System.getProperty("user.home") + "\\Downloads");
             try {
                 Files.copy(file.toPath(), path.resolve(file.getName()));
-            } catch (IOException e1) {
-                e1.printStackTrace();
+            } catch (Exception e1) {
+                showMessageDialog(null, "Please select a file");
             }
         }
     }
