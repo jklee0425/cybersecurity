@@ -77,10 +77,6 @@ public class Server extends JFrame{
 		}
 	}
 	
-	public static void main(String[] args) {
-		new Server(8081);
-	}
-	
 	class ClientHandler implements Runnable{
 		
 		private DataInputStream in;
@@ -180,4 +176,11 @@ public class Server extends JFrame{
 		
 	}
 
+	public static void main(String[] args) {
+		Scanner input = new Scanner(System.in);
+		System.out.print("Port number: ");
+		int port = input.nextInt();
+		input.close();
+		new Server(port);
+	}
 }
